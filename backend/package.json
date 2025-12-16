@@ -6,6 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "server": "nodemon src/index.js",
+    "serverApp": "nodemon app.js",
     "start": "node src/index.js"
   },
   "keywords": [
