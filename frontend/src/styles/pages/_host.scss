@@ -1,0 +1,169 @@
+@import '../variables';
+@import '../mixins';
+
+.host-page {
+  min-height: 100vh;
+  background: $bg-light;
+}
+
+.host-header {
+  background: $primary-color;
+  color: $text-light;
+  padding: $spacing-lg $spacing-xl;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    font-size: $font-size-2xl;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.game-info {
+  display: flex;
+  gap: $spacing-lg;
+  font-size: $font-size-base;
+}
+
+.status {
+  padding: $spacing-xs $spacing-md;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $border-radius;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.host-content {
+  padding: $spacing-xl;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.round-control {
+  @include card;
+  margin-bottom: $spacing-xl;
+}
+
+.round-header {
+  padding-bottom: $spacing-lg;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: $spacing-lg;
+
+  h2 {
+    font-size: $font-size-xl;
+    color: $text-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  span {
+    display: inline-block;
+    margin-right: $spacing-md;
+    padding: $spacing-xs $spacing-md;
+    background: $bg-light;
+    border-radius: $border-radius;
+    font-size: $font-size-sm;
+  }
+}
+
+.answers-control {
+  margin-bottom: $spacing-xl;
+
+  h3 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+  }
+}
+
+.answer-control-row {
+  display: grid;
+  grid-template-columns: 50px 2fr 80px 120px 120px;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  background: $bg-light;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-sm;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.answer-pos {
+  font-weight: bold;
+  font-size: $font-size-lg;
+}
+
+.answer-status {
+  font-size: $font-size-sm;
+  
+  &.revealed {
+    color: $success-color;
+  }
+
+  &.hidden {
+    color: $secondary-color;
+  }
+}
+
+.team-control {
+  margin-bottom: $spacing-xl;
+
+  h3 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+  }
+}
+
+.team-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.team-section {
+  @include card;
+  background: $bg-light;
+
+  h4 {
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-sm;
+    color: $text-dark;
+  }
+
+  p {
+    margin-bottom: $spacing-md;
+    color: $secondary-color;
+  }
+
+  button {
+    width: 100%;
+    margin-bottom: $spacing-sm;
+  }
+}
+
+.round-navigation {
+  @include card;
+
+  h3 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+  }
+}
+
+.nav-buttons {
+  display: flex;
+  gap: $spacing-md;
+  flex-wrap: wrap;
+}
+
+.no-round,
+.host-loading {
+  @include flex-center;
+  min-height: 50vh;
+  font-size: $font-size-xl;
+  color: $secondary-color;
+}

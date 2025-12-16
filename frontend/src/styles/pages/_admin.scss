@@ -1,0 +1,198 @@
+@import '../variables';
+@import '../mixins';
+
+.admin-page {
+  min-height: 100vh;
+  background: $bg-light;
+}
+
+.admin-header {
+  background: $primary-color;
+  color: $text-light;
+  padding: $spacing-lg $spacing-xl;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  h1 {
+    font-size: $font-size-2xl;
+  }
+}
+
+.admin-tabs {
+  display: flex;
+  gap: $spacing-sm;
+  padding: $spacing-md $spacing-xl;
+  background: white;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.tab {
+  @include button-base;
+  background: transparent;
+  color: $text-dark;
+
+  &.active {
+    background: $primary-color;
+    color: $text-light;
+  }
+}
+
+.admin-content {
+  padding: $spacing-xl;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// Game config form
+.game-config-form {
+  @include card;
+
+  h2 {
+    margin-bottom: $spacing-lg;
+    color: $text-dark;
+  }
+}
+
+// Category manager
+.category-manager {
+  @include card;
+
+  h2,
+  h3 {
+    margin-bottom: $spacing-lg;
+    color: $text-dark;
+  }
+}
+
+.category-form {
+  padding-bottom: $spacing-xl;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: $spacing-xl;
+}
+
+.categories-list {
+  margin-top: $spacing-xl;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: $spacing-md;
+
+  th,
+  td {
+    padding: $spacing-md;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  th {
+    background: $bg-light;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  td {
+    color: $secondary-color;
+  }
+
+  button {
+    margin-right: $spacing-sm;
+  }
+}
+
+.status {
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius;
+  font-size: $font-size-sm;
+  font-weight: 600;
+
+  &.active {
+    background: rgba($success-color, 0.1);
+    color: $success-color;
+  }
+
+  &.inactive {
+    background: rgba($secondary-color, 0.1);
+    color: $secondary-color;
+  }
+}
+
+// Question manager
+.question-manager {
+  @include card;
+
+  h2,
+  h4 {
+    margin-bottom: $spacing-lg;
+    color: $text-dark;
+  }
+}
+
+.mode-selector {
+  display: flex;
+  gap: $spacing-md;
+  margin-bottom: $spacing-xl;
+}
+
+.manual-form,
+.image-import,
+.ai-suggestions {
+  margin-top: $spacing-lg;
+}
+
+.answers-section {
+  margin: $spacing-xl 0;
+  padding: $spacing-lg;
+  background: $bg-light;
+  border-radius: $border-radius;
+}
+
+.answer-input-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.extracted-preview,
+.ai-preview {
+  @include card;
+  margin-top: $spacing-lg;
+  background: rgba($success-color, 0.05);
+
+  h4,
+  h5 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+  }
+
+  p {
+    margin-bottom: $spacing-sm;
+    color: $secondary-color;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: $spacing-md 0;
+
+    li {
+      padding: $spacing-sm;
+      background: white;
+      border-radius: $border-radius;
+      margin-bottom: $spacing-sm;
+    }
+  }
+
+  button {
+    margin-right: $spacing-md;
+    margin-top: $spacing-md;
+  }
+}

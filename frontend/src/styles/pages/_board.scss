@@ -1,0 +1,206 @@
+@import '../variables';
+@import '../mixins';
+
+.game-board {
+  min-height: 100vh;
+  background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
+  color: $text-light;
+  @include flex-column;
+}
+
+.board-header {
+  padding: $spacing-lg $spacing-xl;
+  text-align: center;
+  background: rgba(0, 0, 0, 0.3);
+}
+
+.board-title {
+  font-size: $font-size-3xl;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.board-content {
+  display: grid;
+  grid-template-columns: 200px 1fr 200px;
+  gap: $spacing-lg;
+  flex: 1;
+  padding: $spacing-xl;
+
+  @include tablet {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+  }
+}
+
+.team-sidebar {
+  @include flex-center;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $border-radius;
+  padding: $spacing-xl;
+  backdrop-filter: blur(10px);
+
+  &.team-a {
+    background: rgba($team-a-color, 0.2);
+  }
+
+  &.team-b {
+    background: rgba($team-b-color, 0.2);
+  }
+}
+
+.team-info {
+  text-align: center;
+
+  h2 {
+    font-size: $font-size-xl;
+    margin-bottom: $spacing-md;
+  }
+}
+
+.team-score {
+  font-size: $font-size-3xl;
+  font-weight: bold;
+  padding: $spacing-lg;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: $border-radius;
+}
+
+.board-main {
+  @include flex-column;
+  gap: $spacing-lg;
+}
+
+.round-info {
+  text-align: center;
+  padding: $spacing-lg;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: $border-radius;
+  backdrop-filter: blur(10px);
+}
+
+.question-text {
+  font-size: $font-size-2xl;
+  margin-bottom: $spacing-md;
+}
+
+.round-meta {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-lg;
+  font-size: $font-size-lg;
+
+  span {
+    padding: $spacing-xs $spacing-md;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: $border-radius;
+  }
+}
+
+.answers-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: $spacing-md;
+
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.answer-row {
+  display: grid;
+  grid-template-columns: 60px 1fr 80px;
+  align-items: center;
+  gap: $spacing-md;
+  padding: $spacing-lg;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: $border-radius;
+  min-height: 70px;
+  font-size: $font-size-lg;
+  border: 3px solid transparent;
+  transition: all 0.3s;
+
+  &.revealed {
+    background: rgba($success-color, 0.3);
+    border-color: $success-color;
+    animation: reveal 0.5s ease-out;
+  }
+
+  &.hidden {
+    .answer-text,
+    .answer-points {
+      visibility: hidden;
+    }
+  }
+}
+
+@keyframes reveal {
+  0% {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.answer-position {
+  font-size: $font-size-2xl;
+  font-weight: bold;
+  text-align: center;
+}
+
+.answer-text {
+  font-weight: 600;
+}
+
+.answer-points {
+  text-align: right;
+  font-size: $font-size-xl;
+  font-weight: bold;
+}
+
+.strikes-container {
+  text-align: center;
+  padding: $spacing-xl;
+}
+
+.strikes {
+  display: flex;
+  justify-content: center;
+  gap: $spacing-lg;
+}
+
+.strike {
+  font-size: 4rem;
+  color: rgba(255, 255, 255, 0.2);
+  transition: all 0.3s;
+
+  &.active {
+    color: $danger-color;
+    text-shadow: 0 0 20px $danger-color;
+    animation: strike-appear 0.5s ease-out;
+  }
+}
+
+@keyframes strike-appear {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.board-loading,
+.waiting-round {
+  @include flex-center;
+  min-height: 50vh;
+  font-size: $font-size-2xl;
+}

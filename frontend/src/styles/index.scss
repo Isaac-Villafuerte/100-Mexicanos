@@ -1,0 +1,113 @@
+@import 'variables';
+@import 'mixins';
+
+// Reset
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: $font-family;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: $bg-light;
+  color: $text-dark;
+}
+
+// Global utility classes
+.app {
+  min-height: 100vh;
+}
+
+// Buttons
+.btn {
+  @include button-base;
+
+  &-primary {
+    background: $primary-color;
+    color: $text-light;
+  }
+
+  &-secondary {
+    background: $secondary-color;
+    color: $text-light;
+  }
+
+  &-accent {
+    background: $accent-color;
+    color: $text-dark;
+  }
+
+  &-success {
+    background: $success-color;
+    color: $text-light;
+  }
+
+  &-danger {
+    background: $danger-color;
+    color: $text-light;
+  }
+
+  &-small {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
+  }
+}
+
+// Forms
+.form-group {
+  margin-bottom: $spacing-lg;
+
+  label {
+    display: block;
+    margin-bottom: $spacing-sm;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  input,
+  textarea,
+  select {
+    width: 100%;
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid #cbd5e1;
+    border-radius: $border-radius;
+    font-size: $font-size-base;
+    font-family: $font-family;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+      box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.form-row {
+  display: flex;
+  gap: $spacing-md;
+
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+// Loading states
+.loading {
+  @include flex-center;
+  min-height: 50vh;
+  font-size: $font-size-lg;
+  color: $secondary-color;
+}
+
+// Import page styles
+@import 'pages/home';
+@import 'pages/board';
+@import 'pages/host';
+@import 'pages/admin';

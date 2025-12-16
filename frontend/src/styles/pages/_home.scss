@@ -1,0 +1,59 @@
+@import '../variables';
+@import '../mixins';
+
+.home-page {
+  @include flex-center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, $primary-color 0%, $accent-color 100%);
+  padding: $spacing-xl;
+}
+
+.home-container {
+  @include card;
+  max-width: 600px;
+  width: 100%;
+  text-align: center;
+}
+
+.home-title {
+  font-size: $font-size-3xl;
+  color: $primary-color;
+  margin-bottom: $spacing-sm;
+}
+
+.home-subtitle {
+  font-size: $font-size-lg;
+  color: $secondary-color;
+  margin-bottom: $spacing-2xl;
+}
+
+.home-actions {
+  @include flex-column;
+  gap: $spacing-lg;
+}
+
+.game-join {
+  @include flex-column;
+  gap: $spacing-md;
+}
+
+.home-instructions {
+  margin-top: $spacing-2xl;
+  padding-top: $spacing-xl;
+  border-top: 1px solid #e2e8f0;
+  text-align: left;
+
+  h3 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+  }
+
+  ol {
+    padding-left: $spacing-lg;
+
+    li {
+      margin-bottom: $spacing-sm;
+      color: $secondary-color;
+    }
+  }
+}
