@@ -65,25 +65,56 @@ export function adminRoutes(deps) {
 
   // ===== QUESTIONS =====
 
-  // Get questions by category
+  // Get questions with pagination (ordered by creation date, newest first)
   router.get('/questions', async (req, res, next) => {
     try {
-      const { categoryId } = req.query;
+      const { categoryId, page = 1, limit = 10 } = req.query;
       
-      let questions;
-      if (categoryId) {
-        questions = await deps.questionRepository.findByCategoryId(parseInt(categoryId));
-      } else {
-        // Get all active categories and their questions
-        const categories = await deps.categoryRepository.findAll();
-        questions = [];
-        for (const cat of categories) {
-          const catQuestions = await deps.questionRepository.findByCategoryId(cat.id);
-          questions.push(...catQuestions);
-        }
+      const result = await deps.questionRepository.findAllPaginated({
+        page: parseInt(page),
+        limit: parseInt(limit),
+        categoryId: categoryId ? parseInt(categoryId) : null
+      });
+      
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get single question with answers
+  router.get('/questions/:id', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const question = await deps.questionRepository.findById(parseInt(id));
+      
+      if (!question) {
+        return res.status(404).json({ error: 'Question not found' });
       }
       
-      res.json({ questions });
+      res.json({ question });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Update question with answers
+  router.put('/questions/:id', async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const { text, categoryId, isActive, answers } = req.body;
+      
+      await deps.questionRepository.updateWithAnswers(
+        parseInt(id),
+        { text, categoryId, isActive },
+        answers?.map((ans, idx) => ({
+          text: ans.text,
+          points: parseInt(ans.points),
+          position: idx + 1
+        }))
+      );
+      
+      res.json({ message: 'Question updated' });
     } catch (error) {
       next(error);
     }
@@ -106,21 +137,67 @@ export function adminRoutes(deps) {
     }
   });
 
-  // Import question from image
+  // Import questions from image (supports 1-4 question cards)
   router.post('/questions/import-from-image', upload.single('image'), async (req, res, next) => {
     try {
       if (!req.file) {
         return res.status(400).json({ error: 'No image provided' });
       }
 
-      const autoDetectCategory = req.body.autoDetectCategory === 'true';
-
       const result = await deps.importQuestionFromImageUseCase.execute({
-        imagePath: req.file.path,
-        autoDetectCategory
+        imagePath: req.file.path
       });
 
       res.json({ result });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Save multiple questions (with category creation if needed)
+  router.post('/questions/bulk', async (req, res, next) => {
+    try {
+      const { questions } = req.body;
+      
+      if (!Array.isArray(questions) || questions.length === 0) {
+        return res.status(400).json({ error: 'No questions provided' });
+      }
+
+      const results = [];
+
+      for (const q of questions) {
+        let categoryId = q.categoryId || q.category?.id;
+
+        // If category is new, create it first
+        if (q.category?.isNew && q.category?.name) {
+          const newCategory = await deps.categoryRepository.create({
+            name: q.category.name,
+            description: q.category.description || '',
+            isActive: true
+          });
+          categoryId = newCategory.id;
+        }
+
+        // Validate categoryId exists
+        if (!categoryId) {
+          throw new Error(`La pregunta "${q.question}" no tiene categoría válida`);
+        }
+
+        // Create the question
+        const result = await deps.createQuestionUseCase.execute({
+          categoryId: parseInt(categoryId),
+          text: q.question,
+          answers: q.answers.map((ans, idx) => ({
+            text: ans.text,
+            points: parseInt(ans.points),
+            position: idx + 1
+          }))
+        });
+
+        results.push(result);
+      }
+
+      res.status(201).json({ results, count: results.length });
     } catch (error) {
       next(error);
     }

@@ -4,29 +4,30 @@ export class ImportQuestionFromImageUseCase {
     this.categoryRepository = categoryRepository;
   }
 
-  async execute({ imagePath, autoDetectCategory = false }) {
-    // Extract data from image using AI
-    const extracted = await this.imageQuestionExtractor.extract(imagePath);
+  /**
+   * Extract questions from an image
+   * @param {Object} params
+   * @param {string} params.imagePath - Path to the uploaded image
+   * @returns {Promise<{questions: Array, categories: Array}>}
+   */
+  async execute({ imagePath }) {
+    // Get existing categories to pass to AI for matching
+    const existingCategories = await this.categoryRepository.findAll();
+    
+    // Extract data from image using AI (now returns array of questions)
+    const extractedQuestions = await this.imageQuestionExtractor.extract(
+      imagePath,
+      existingCategories.map(c => ({ id: c.id, name: c.name, description: c.description }))
+    );
 
-    let categoryId = null;
-
-    // If auto-detect is enabled and category name was extracted
-    if (autoDetectCategory && extracted.categoryName) {
-      const categories = await this.categoryRepository.findAll();
-      const matchingCategory = categories.find(
-        cat => cat.name.toLowerCase() === extracted.categoryName.toLowerCase()
-      );
-      
-      if (matchingCategory) {
-        categoryId = matchingCategory.id;
-      }
-    }
-
+    // Return questions with category info for frontend editing
     return {
-      question: extracted.question,
-      categoryId,
-      categoryName: extracted.categoryName,
-      answers: extracted.answers
+      questions: extractedQuestions,
+      existingCategories: existingCategories.map(c => ({
+        id: c.id,
+        name: c.name,
+        description: c.description
+      }))
     };
   }
 }

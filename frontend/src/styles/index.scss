@@ -106,7 +106,7 @@ body {
   color: $secondary-color;
 }
 
-// Import page styles
+// Import page styles (using @import for stylesheets that contain rules)
 @import 'pages/home';
 @import 'pages/board';
 @import 'pages/host';

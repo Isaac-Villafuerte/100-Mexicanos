@@ -1,112 +1,298 @@
 @import '../variables';
 @import '../mixins';
 
+// =====================
+// MOBILE FIRST APPROACH
+// =====================
+
 .admin-page {
   min-height: 100vh;
   background: $bg-light;
+  overflow-x: hidden;
 }
 
+// Header - Mobile first
 .admin-header {
   background: $primary-color;
   color: $text-light;
-  padding: $spacing-lg $spacing-xl;
+  padding: $spacing-sm $spacing-md;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  gap: $spacing-sm;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   h1 {
-    font-size: $font-size-2xl;
+    font-size: $font-size-lg;
+    text-align: center;
+  }
+
+  .btn {
+    width: 100%;
+    font-size: $font-size-sm;
+    padding: $spacing-xs $spacing-sm;
+  }
+
+  // Tablet and up
+  @media (min-width: 480px) {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-md $spacing-lg;
+
+    h1 {
+      font-size: $font-size-xl;
+      text-align: left;
+    }
+
+    .btn {
+      width: auto;
+    }
+  }
+
+  // Desktop
+  @media (min-width: 768px) {
+    padding: $spacing-lg $spacing-xl;
+
+    h1 {
+      font-size: $font-size-2xl;
+    }
   }
 }
 
+// Tabs - Mobile first (horizontal scroll)
 .admin-tabs {
   display: flex;
-  gap: $spacing-sm;
-  padding: $spacing-md $spacing-xl;
+  gap: $spacing-xs;
+  padding: $spacing-sm;
   background: white;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+
+  // Hide scrollbar but keep functionality
+  &::-webkit-scrollbar {
+    display: none;
+  }
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  @media (min-width: 480px) {
+    gap: $spacing-sm;
+    padding: $spacing-sm $spacing-md;
+    justify-content: center;
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-md $spacing-xl;
+  }
 }
 
 .tab {
   @include button-base;
   background: transparent;
   color: $text-dark;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding: $spacing-xs $spacing-sm;
+  font-size: $font-size-sm;
 
   &.active {
     background: $primary-color;
     color: $text-light;
   }
-}
 
-.admin-content {
-  padding: $spacing-xl;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-// Game config form
-.game-config-form {
-  @include card;
-
-  h2 {
-    margin-bottom: $spacing-lg;
-    color: $text-dark;
+  @media (min-width: 480px) {
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-base;
   }
 }
 
-// Category manager
+// Content - Mobile first
+.admin-content {
+  padding: $spacing-sm;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-xl;
+  }
+}
+
+// Game config form - Mobile first
+.game-config-form {
+  background: white;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+    font-size: $font-size-base;
+  }
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+
+    h2 {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-lg;
+    }
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-lg;
+  }
+}
+
+// Category manager - Mobile first
 .category-manager {
-  @include card;
+  background: white;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
   h2,
   h3 {
-    margin-bottom: $spacing-lg;
+    margin-bottom: $spacing-md;
     color: $text-dark;
+    font-size: $font-size-base;
+  }
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+
+    h2, h3 {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-lg;
+    }
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-lg;
   }
 }
 
 .category-form {
-  padding-bottom: $spacing-xl;
+  padding-bottom: $spacing-md;
   border-bottom: 2px solid #e2e8f0;
-  margin-bottom: $spacing-xl;
+  margin-bottom: $spacing-md;
+
+  @media (min-width: 480px) {
+    padding-bottom: $spacing-xl;
+    margin-bottom: $spacing-xl;
+  }
 }
 
 .categories-list {
-  margin-top: $spacing-xl;
+  margin-top: $spacing-md;
+
+  @media (min-width: 480px) {
+    margin-top: $spacing-xl;
+  }
 }
 
+// Data table - Mobile: card layout, Desktop: table
 .data-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: $spacing-md;
+  margin-top: $spacing-sm;
 
-  th,
-  td {
-    padding: $spacing-md;
-    text-align: left;
-    border-bottom: 1px solid #e2e8f0;
+  // Mobile: Hide table structure, show as cards
+  @media (max-width: 599px) {
+    display: block;
+
+    thead {
+      display: none;
+    }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-sm;
+    }
+
+    tr {
+      display: flex;
+      flex-direction: column;
+      background: $bg-light;
+      padding: $spacing-sm;
+      border-radius: $border-radius;
+      border: 1px solid #e2e8f0;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: $spacing-xs 0;
+      border: none;
+      font-size: $font-size-sm;
+
+      &::before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: $text-dark;
+        margin-right: $spacing-sm;
+      }
+
+      &:last-child {
+        justify-content: flex-end;
+        padding-top: $spacing-sm;
+        border-top: 1px solid #e2e8f0;
+        margin-top: $spacing-xs;
+      }
+    }
   }
 
-  th {
-    background: $bg-light;
-    font-weight: 600;
-    color: $text-dark;
+  // Tablet and up: normal table
+  @media (min-width: 600px) {
+    th,
+    td {
+      padding: $spacing-sm;
+      text-align: left;
+      border-bottom: 1px solid #e2e8f0;
+      font-size: $font-size-sm;
+    }
+
+    th {
+      background: $bg-light;
+      font-weight: 600;
+      color: $text-dark;
+    }
+
+    td {
+      color: $secondary-color;
+    }
   }
 
-  td {
-    color: $secondary-color;
+  @media (min-width: 768px) {
+    th,
+    td {
+      padding: $spacing-md;
+      font-size: $font-size-base;
+    }
   }
 
   button {
-    margin-right: $spacing-sm;
+    margin-right: $spacing-xs;
+    margin-bottom: $spacing-xs;
+
+    @media (min-width: 600px) {
+      margin-right: $spacing-sm;
+      margin-bottom: 0;
+    }
   }
 }
 
 .status {
-  padding: $spacing-xs $spacing-sm;
+  padding: 2px $spacing-xs;
   border-radius: $border-radius;
-  font-size: $font-size-sm;
+  font-size: 11px;
   font-weight: 600;
 
   &.active {
@@ -118,81 +304,1208 @@
     background: rgba($secondary-color, 0.1);
     color: $secondary-color;
   }
-}
 
-// Question manager
-.question-manager {
-  @include card;
-
-  h2,
-  h4 {
-    margin-bottom: $spacing-lg;
-    color: $text-dark;
+  @media (min-width: 480px) {
+    padding: $spacing-xs $spacing-sm;
+    font-size: $font-size-sm;
   }
 }
 
+// Question manager - Mobile first
+.question-manager {
+  background: white;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  h2 {
+    margin-bottom: $spacing-sm;
+    color: $text-dark;
+    font-size: $font-size-base;
+  }
+
+  h4 {
+    margin-bottom: $spacing-sm;
+    color: $text-dark;
+    font-size: $font-size-sm;
+  }
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+
+    h2 {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-md;
+    }
+
+    h4 {
+      font-size: $font-size-base;
+      margin-bottom: $spacing-md;
+    }
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-lg;
+
+    h2, h4 {
+      margin-bottom: $spacing-lg;
+    }
+  }
+}
+
+// Mode selector - Mobile first (wrap on small screens)
 .mode-selector {
   display: flex;
-  gap: $spacing-md;
-  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-md;
+
+  .btn {
+    flex: 1;
+    min-width: 0;
+    padding: $spacing-xs;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  @media (min-width: 400px) {
+    gap: $spacing-sm;
+
+    .btn {
+      flex: none;
+      padding: $spacing-xs $spacing-sm;
+      font-size: $font-size-sm;
+    }
+  }
+
+  @media (min-width: 600px) {
+    gap: $spacing-md;
+    margin-bottom: $spacing-xl;
+
+    .btn {
+      padding: $spacing-sm $spacing-lg;
+      font-size: $font-size-base;
+    }
+  }
 }
 
 .manual-form,
 .image-import,
 .ai-suggestions {
-  margin-top: $spacing-lg;
-}
+  margin-top: $spacing-sm;
 
-.answers-section {
-  margin: $spacing-xl 0;
-  padding: $spacing-lg;
-  background: $bg-light;
-  border-radius: $border-radius;
-}
+  @media (min-width: 480px) {
+    margin-top: $spacing-md;
+  }
 
-.answer-input-row {
-  display: grid;
-  grid-template-columns: 2fr 1fr auto;
-  gap: $spacing-md;
-  margin-bottom: $spacing-md;
-
-  @include mobile {
-    grid-template-columns: 1fr;
+  @media (min-width: 768px) {
+    margin-top: $spacing-lg;
   }
 }
 
+// Answers section - Mobile first
+.answers-section {
+  margin: $spacing-sm 0;
+  padding: $spacing-sm;
+  background: $bg-light;
+  border-radius: $border-radius;
+
+  h4 {
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  @media (min-width: 480px) {
+    margin: $spacing-md 0;
+    padding: $spacing-md;
+
+    h4 {
+      font-size: $font-size-base;
+    }
+  }
+
+  @media (min-width: 768px) {
+    margin: $spacing-xl 0;
+    padding: $spacing-lg;
+  }
+}
+
+// Answer input row - Mobile first (stacked on mobile)
+.answer-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  margin-bottom: $spacing-sm;
+  padding: $spacing-xs;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+
+  input {
+    font-size: $font-size-sm;
+    padding: $spacing-xs;
+  }
+
+  @media (min-width: 480px) {
+    display: grid;
+    grid-template-columns: 1fr 80px 32px;
+    gap: $spacing-sm;
+    padding: 0;
+    background: none;
+    border: none;
+  }
+
+  @media (min-width: 600px) {
+    grid-template-columns: 2fr 1fr auto;
+    gap: $spacing-md;
+  }
+}
+
+// AI Preview - Mobile first
 .extracted-preview,
 .ai-preview {
-  @include card;
-  margin-top: $spacing-lg;
   background: rgba($success-color, 0.05);
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  margin-top: $spacing-sm;
 
   h4,
   h5 {
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-sm;
     color: $text-dark;
+    font-size: $font-size-sm;
   }
 
   p {
-    margin-bottom: $spacing-sm;
+    margin-bottom: $spacing-xs;
     color: $secondary-color;
+    font-size: $font-size-sm;
   }
 
   ul {
     list-style: none;
     padding: 0;
-    margin: $spacing-md 0;
+    margin: $spacing-sm 0;
 
     li {
-      padding: $spacing-sm;
+      padding: $spacing-xs;
       background: white;
       border-radius: $border-radius;
-      margin-bottom: $spacing-sm;
+      margin-bottom: $spacing-xs;
+      font-size: $font-size-sm;
     }
   }
 
   button {
-    margin-right: $spacing-md;
+    margin-right: $spacing-sm;
+    margin-top: $spacing-sm;
+    font-size: $font-size-sm;
+    padding: $spacing-xs $spacing-sm;
+  }
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
     margin-top: $spacing-md;
+
+    h4, h5 {
+      font-size: $font-size-base;
+      margin-bottom: $spacing-md;
+    }
+
+    ul li {
+      padding: $spacing-sm;
+    }
+
+    button {
+      margin-right: $spacing-md;
+      margin-top: $spacing-md;
+    }
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-lg;
+    margin-top: $spacing-lg;
+  }
+}
+
+// Image Input Component - Mobile first
+.image-input {
+  &__hint {
+    text-align: center;
+    color: $secondary-color;
+    margin-bottom: $spacing-sm;
+    font-size: 12px;
+
+    @media (min-width: 480px) {
+      font-size: $font-size-sm;
+      margin-bottom: $spacing-md;
+    }
+  }
+
+  &__dropzone {
+    border: 2px dashed #cbd5e0;
+    border-radius: $border-radius;
+    padding: $spacing-md;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: $bg-light;
+
+    &:hover,
+    &.active {
+      border-color: $primary-color;
+      background: rgba($primary-color, 0.05);
+    }
+
+    &.disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    @media (min-width: 480px) {
+      padding: $spacing-lg;
+    }
+
+    @media (min-width: 768px) {
+      padding: $spacing-xl;
+    }
+  }
+
+  &__dropzone-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-xs;
+
+    @media (min-width: 480px) {
+      gap: $spacing-sm;
+    }
+  }
+
+  &__icon {
+    font-size: 2rem;
+
+    @media (min-width: 480px) {
+      font-size: 3rem;
+    }
+  }
+
+  &__or {
+    color: $secondary-color;
+    font-size: 12px;
+
+    @media (min-width: 480px) {
+      font-size: $font-size-sm;
+    }
+  }
+
+  &__paste-hint {
+    font-size: 11px;
+    color: $secondary-color;
+
+    @media (min-width: 480px) {
+      font-size: $font-size-sm;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+
+    .btn {
+      width: 100%;
+      font-size: $font-size-sm;
+    }
+
+    @media (min-width: 400px) {
+      flex-direction: row;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: $spacing-sm;
+
+      .btn {
+        width: auto;
+      }
+    }
+
+    @media (min-width: 480px) {
+      gap: $spacing-md;
+      margin-top: $spacing-lg;
+    }
+  }
+
+  &__preview {
+    position: relative;
+    text-align: center;
+
+    img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: $border-radius;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+      @media (min-width: 480px) {
+        max-height: 300px;
+      }
+    }
+  }
+
+  &__clear {
+    margin-top: $spacing-sm;
+
+    @media (min-width: 480px) {
+      margin-top: $spacing-md;
+    }
+  }
+
+  &__processing {
+    text-align: center;
+    padding: $spacing-md;
+    color: $primary-color;
+
+    .spinner {
+      display: inline-block;
+      animation: spin 1s linear infinite;
+    }
+
+    @media (min-width: 480px) {
+      padding: $spacing-lg;
+    }
+  }
+
+  &__error {
+    text-align: center;
+    padding: $spacing-sm;
+    color: $danger-color;
+    background: rgba($danger-color, 0.1);
+    border-radius: $border-radius;
+    margin-top: $spacing-sm;
+    font-size: $font-size-sm;
+
+    @media (min-width: 480px) {
+      padding: $spacing-md;
+      margin-top: $spacing-md;
+    }
+  }
+}
+
+// Extract button - Mobile first
+.extract-btn {
+  display: block;
+  width: 100%;
+  margin-top: $spacing-sm;
+  font-size: $font-size-sm;
+  padding: $spacing-sm;
+
+  @media (min-width: 480px) {
+    margin-top: $spacing-md;
+    font-size: $font-size-base;
+    padding: $spacing-md;
+  }
+
+  @media (min-width: 768px) {
+    margin-top: $spacing-lg;
+    font-size: $font-size-lg;
+    padding: $spacing-md $spacing-xl;
+  }
+}
+
+// Extracted Questions Form - Compact style like modal
+.extracted-questions-form {
+  &__header {
+    text-align: center;
+    margin-bottom: $spacing-xs;
+    padding-bottom: $spacing-xs;
+    border-bottom: 1px solid #e5e7eb;
+
+    h3 {
+      color: $text-dark;
+      margin-bottom: 2px;
+      font-size: $font-size-sm;
+      font-weight: 600;
+    }
+
+    .hint {
+      color: $secondary-color;
+      font-size: 11px;
+    }
+
+    @media (min-width: 480px) {
+      margin-bottom: $spacing-sm;
+
+      h3 {
+        font-size: $font-size-base;
+      }
+
+      .hint {
+        font-size: 12px;
+      }
+    }
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+    padding-top: $spacing-sm;
+    border-top: 1px solid #e5e7eb;
+
+    .btn {
+      width: 100%;
+      font-size: $font-size-sm;
+      padding: $spacing-xs $spacing-sm;
+    }
+
+    @media (min-width: 400px) {
+      flex-direction: row;
+      justify-content: flex-end;
+      gap: $spacing-sm;
+
+      .btn {
+        width: auto;
+      }
+    }
+  }
+}
+
+// Question Preview Card - Compact style like modal
+.question-preview-card {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: $spacing-sm;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+  }
+
+  // Header with number and delete button
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-xs;
+    padding-bottom: $spacing-xs;
+    border-bottom: 1px solid #e5e7eb;
+
+    .btn-small {
+      padding: 2px 6px;
+      font-size: 11px;
+    }
+  }
+
+  &__number {
+    font-weight: 600;
+    color: $primary-color;
+    font-size: $font-size-sm;
+  }
+
+  // Category field - styled like modal-field
+  &__category {
+    margin-bottom: $spacing-xs;
+
+    // Label styled like modal
+    > label, .category-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    .category-toggle {
+      display: flex;
+      gap: $spacing-sm;
+      margin-bottom: $spacing-xs;
+
+      label {
+        display: flex;
+        align-items: center;
+        gap: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #6b7280;
+
+        &.active {
+          color: $primary-color;
+          font-weight: 600;
+        }
+
+        input[type="radio"] {
+          width: auto;
+          margin: 0;
+        }
+      }
+    }
+
+    .category-select {
+      width: 100%;
+      padding: 4px 8px;
+      font-size: 13px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+
+    .new-category-inputs {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-xs;
+
+      @media (min-width: 400px) {
+        flex-direction: row;
+      }
+
+      input {
+        flex: 1;
+        padding: 4px 8px;
+        font-size: 13px;
+        border: 1px solid #d1d5db;
+        border-radius: 4px;
+
+        &:focus {
+          outline: none;
+          border-color: $primary-color;
+        }
+      }
+    }
+  }
+
+  // Question text field - styled like modal-field
+  &__question {
+    margin-bottom: $spacing-xs;
+
+    label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 2px;
+      text-transform: uppercase;
+    }
+
+    textarea {
+      width: 100%;
+      resize: vertical;
+      padding: 4px 8px;
+      font-size: 0.9em;
+      font-weight: 800;
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 36px;
+      border: 2px solid #d1d5db;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+    }
+  }
+
+  // Answers section - styled like modal-answers
+  &__answers {
+    label {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      color: #6b7280;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+    }
+
+    // Answer rows container
+    .answers-container {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    // Compact answer row like modal-answer-row
+    // Override global .answer-row from _board.scss
+    .answer-row {
+      display: grid;
+      grid-template-columns: 18px 1fr 45px 20px;
+      gap: 4px;
+      align-items: center;
+      background: #f9fafb;
+      padding: 3px 5px;
+      border-radius: 4px;
+      // Reset inherited styles from _board.scss
+      min-height: auto;
+      font-size: inherit;
+      border: none;
+      transition: none;
+
+      @media (min-width: 400px) {
+        grid-template-columns: 20px 1fr 50px 24px;
+        gap: 6px;
+        padding: 4px 6px;
+      }
+    }
+
+    .answer-position {
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: $primary-color;
+      color: #fff;
+      border-radius: 50%;
+      font-size: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
+
+      @media (min-width: 400px) {
+        width: 20px;
+        height: 20px;
+        font-size: 11px;
+      }
+    }
+
+    .answer-text {
+      width: 100%;
+      padding: 3px 6px;
+      font-size: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+
+      @media (min-width: 400px) {
+        padding: 4px 6px;
+        font-size: 13px;
+      }
+    }
+
+    .answer-points {
+      width: 100%;
+      text-align: center;
+      padding: 3px 4px;
+      font-size: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+
+      @media (min-width: 400px) {
+        padding: 4px;
+        font-size: 13px;
+      }
+    }
+
+    .btn-small {
+      padding: 2px 5px;
+      font-size: 10px;
+      line-height: 1;
+
+      @media (min-width: 400px) {
+        padding: 3px 6px;
+        font-size: 11px;
+      }
+    }
+
+    .add-answer-btn {
+      margin-top: $spacing-xs;
+      font-size: 11px;
+      padding: 3px 8px;
+
+      @media (min-width: 400px) {
+        font-size: 12px;
+        padding: 4px 10px;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Questions List - Mobile first
+.questions-list {
+  margin-top: $spacing-sm;
+
+  @media (min-width: 480px) {
+    margin-top: $spacing-md;
+  }
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-sm;
+
+    h4 {
+      margin: 0;
+      font-size: $font-size-sm;
+      color: $text-dark;
+    }
+
+    @media (min-width: 400px) {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: $spacing-sm;
+
+      h4 {
+        font-size: $font-size-base;
+      }
+    }
+  }
+
+  &__filter {
+    padding: 4px 6px;
+    font-size: 12px;
+    width: 100%;
+
+    @media (min-width: 400px) {
+      width: auto;
+      min-width: 120px;
+      padding: 4px 8px;
+      font-size: 13px;
+    }
+
+    @media (min-width: 480px) {
+      min-width: 140px;
+    }
+  }
+
+  &__loading,
+  &__empty {
+    text-align: center;
+    padding: $spacing-md;
+    color: $secondary-color;
+    font-size: $font-size-sm;
+
+    @media (min-width: 480px) {
+      padding: $spacing-lg;
+    }
+  }
+
+  &__items {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+
+    @media (min-width: 480px) {
+      gap: 4px;
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-xs;
+    margin-top: $spacing-sm;
+    padding-top: $spacing-sm;
+    border-top: 1px solid #e5e7eb;
+
+    .btn {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
+    @media (min-width: 400px) {
+      gap: $spacing-sm;
+
+      .btn {
+        padding: 6px 12px;
+        font-size: 12px;
+      }
+    }
+
+    @media (min-width: 480px) {
+      margin-top: $spacing-md;
+    }
+  }
+
+  &__page-info {
+    font-size: 11px;
+    color: $secondary-color;
+    min-width: 50px;
+    text-align: center;
+
+    @media (min-width: 400px) {
+      font-size: 13px;
+      min-width: 60px;
+    }
+  }
+
+  &__total {
+    text-align: center;
+    font-size: 11px;
+    color: $secondary-color;
+    margin-top: $spacing-xs;
+
+    @media (min-width: 480px) {
+      font-size: 12px;
+    }
+  }
+}
+
+// Question List Item - Mobile first
+.question-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: $primary-color;
+  }
+
+  &:active {
+    background: #f1f5f9;
+  }
+
+  @media (min-width: 480px) {
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+
+  &__content {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+
+    @media (min-width: 480px) {
+      gap: 2px;
+    }
+  }
+
+  &__text {
+    font-size: 12px;
+    color: $text-dark;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    @media (min-width: 480px) {
+      font-size: 13px;
+    }
+  }
+
+  &__category {
+    font-size: 10px;
+    color: $secondary-color;
+
+    @media (min-width: 480px) {
+      font-size: 11px;
+    }
+  }
+
+  &__arrow {
+    font-size: 16px;
+    color: $secondary-color;
+    margin-left: $spacing-xs;
+
+    @media (min-width: 480px) {
+      font-size: 18px;
+      margin-left: $spacing-sm;
+    }
+  }
+}
+
+// Modal - Mobile first
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: $spacing-xs;
+  z-index: 1000;
+  overflow-y: auto;
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+  }
+}
+
+.modal-content {
+  background: #fff;
+  border-radius: 8px;
+  width: 100%;
+  max-width: 500px;
+  margin-top: $spacing-sm;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+
+  @media (min-width: 480px) {
+    border-radius: 10px;
+    margin-top: $spacing-lg;
+  }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: $spacing-xs $spacing-sm;
+  border-bottom: 1px solid #e5e7eb;
+
+  h3 {
+    margin: 0;
+    font-size: $font-size-sm;
+    color: $text-dark;
+  }
+
+  @media (min-width: 480px) {
+    padding: $spacing-sm $spacing-md;
+
+    h3 {
+      font-size: $font-size-base;
+    }
+  }
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: $secondary-color;
+  padding: 4px;
+
+  &:hover {
+    color: $danger-color;
+  }
+
+  @media (min-width: 480px) {
+    font-size: 18px;
+  }
+}
+
+.modal-body {
+  padding: $spacing-sm;
+
+  @media (min-width: 480px) {
+    padding: $spacing-md;
+  }
+}
+
+.modal-field {
+  margin-bottom: $spacing-xs;
+
+  @media (min-width: 480px) {
+    margin-bottom: $spacing-sm;
+  }
+
+  label {
+    display: block;
+    font-size: 10px;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 2px;
+    text-transform: uppercase;
+
+    @media (min-width: 480px) {
+      font-size: 11px;
+    }
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: $text-dark;
+
+    @media (min-width: 480px) {
+      font-size: 14px;
+    }
+  }
+
+  select,
+  textarea,
+  input {
+    width: 100%;
+    padding: 4px 6px;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+
+    &:focus {
+      outline: none;
+      border-color: $primary-color;
+    }
+
+    @media (min-width: 480px) {
+      padding: 6px 8px;
+      font-size: 14px;
+    }
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 40px;
+
+    @media (min-width: 480px) {
+      min-height: 50px;
+    }
+  }
+}
+
+.modal-question-text {
+  font-weight: 500;
+}
+
+.modal-answers {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+
+  @media (min-width: 480px) {
+    gap: 4px;
+  }
+}
+
+// Mobile: stacked, Tablet+: grid
+.modal-answer-row {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #f9fafb;
+  padding: $spacing-xs;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+
+  @media (min-width: 400px) {
+    display: grid;
+    grid-template-columns: 18px 1fr 50px;
+    gap: 4px;
+    align-items: center;
+    padding: 3px 5px;
+    border: none;
+  }
+
+  @media (min-width: 480px) {
+    grid-template-columns: 20px 1fr 60px;
+    gap: 6px;
+    padding: 4px 6px;
+  }
+
+  input {
+    padding: 3px 5px;
+    font-size: 12px;
+
+    @media (min-width: 480px) {
+      padding: 4px 6px;
+      font-size: 13px;
+    }
+  }
+}
+
+.modal-answer-num {
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: $primary-color;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 600;
+
+  @media (min-width: 480px) {
+    width: 20px;
+    height: 20px;
+    font-size: 11px;
+  }
+}
+
+.modal-answer-text {
+  font-size: 12px;
+  color: $text-dark;
+
+  @media (min-width: 480px) {
+    font-size: 13px;
+  }
+}
+
+.modal-answer-points {
+  font-size: 11px;
+  color: $secondary-color;
+  text-align: right;
+
+  @media (min-width: 480px) {
+    font-size: 12px;
+  }
+}
+
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-top: 1px solid #e5e7eb;
+
+  .btn {
+    width: 100%;
+    font-size: $font-size-sm;
+  }
+
+  @media (min-width: 400px) {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: $spacing-sm;
+
+    .btn {
+      width: auto;
+    }
+  }
+
+  @media (min-width: 480px) {
+    padding: $spacing-sm $spacing-md;
+  }
+}
+
+.modal-loading {
+  padding: $spacing-lg;
+  text-align: center;
+  color: $secondary-color;
+  font-size: $font-size-sm;
+
+  @media (min-width: 480px) {
+    padding: $spacing-xl;
   }
 }

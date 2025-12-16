@@ -134,4 +134,101 @@ export class QuestionRepositoryMySQL extends QuestionRepository {
     const pool = getPool();
     await pool.execute('DELETE FROM questions WHERE id = ?', [id]);
   }
+
+  async findAllPaginated({ page = 1, limit = 10, categoryId = null } = {}) {
+    const pool = getPool();
+    const offset = (page - 1) * limit;
+    
+    let countQuery = 'SELECT COUNT(*) as total FROM questions';
+    let dataQuery = `
+      SELECT q.id, q.text, q.is_active, q.category_id, q.created_at,
+             c.name as category_name
+      FROM questions q
+      LEFT JOIN categories c ON q.category_id = c.id
+    `;
+    const params = [];
+
+    if (categoryId) {
+      countQuery += ' WHERE category_id = ?';
+      dataQuery += ' WHERE q.category_id = ?';
+      params.push(categoryId);
+    }
+
+    dataQuery += ' ORDER BY q.created_at DESC, q.id DESC LIMIT ? OFFSET ?';
+
+    const [[{ total }]] = await pool.execute(countQuery, categoryId ? [categoryId] : []);
+    const [rows] = await pool.execute(dataQuery, [...params, String(limit), String(offset)]);
+
+    return {
+      questions: rows.map(row => ({
+        id: row.id,
+        text: row.text,
+        isActive: row.is_active,
+        categoryId: row.category_id,
+        categoryName: row.category_name,
+        createdAt: row.created_at
+      })),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit)
+      }
+    };
+  }
+
+  async updateWithAnswers(id, data, answers) {
+    const pool = getPool();
+    const connection = await pool.getConnection();
+    
+    try {
+      await connection.beginTransaction();
+
+      // Update question
+      const fields = [];
+      const values = [];
+      
+      if (data.text !== undefined) {
+        fields.push('text = ?');
+        values.push(data.text);
+      }
+      if (data.categoryId !== undefined) {
+        fields.push('category_id = ?');
+        values.push(data.categoryId);
+      }
+      if (data.isActive !== undefined) {
+        fields.push('is_active = ?');
+        values.push(data.isActive);
+      }
+
+      if (fields.length > 0) {
+        values.push(id);
+        await connection.execute(
+          `UPDATE questions SET ${fields.join(', ')} WHERE id = ?`,
+          values
+        );
+      }
+
+      // Update answers if provided
+      if (answers && answers.length > 0) {
+        // Delete existing answers
+        await connection.execute('DELETE FROM question_answers WHERE question_id = ?', [id]);
+        
+        // Insert new answers
+        for (const answer of answers) {
+          await connection.execute(
+            'INSERT INTO question_answers (question_id, text, points, position) VALUES (?, ?, ?, ?)',
+            [id, answer.text, answer.points, answer.position]
+          );
+        }
+      }
+
+      await connection.commit();
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
+  }
 }

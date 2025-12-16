@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import ImageInput from './ImageInput';
+import ExtractedQuestionsForm from './ExtractedQuestionsForm';
+import QuestionsList from './QuestionsList';
 
 function QuestionManager({ categories }) {
-  const [activeMode, setActiveMode] = useState('manual'); // 'manual', 'image', 'ai'
+  const [activeMode, setActiveMode] = useState('list'); // 'list', 'manual', 'image', 'ai'
   
   // Manual form state
   const [manualForm, setManualForm] = useState({
@@ -14,8 +17,9 @@ function QuestionManager({ categories }) {
 
   // Image import state
   const [imageFile, setImageFile] = useState(null);
-  const [autoDetectCategory, setAutoDetectCategory] = useState(true);
   const [extractedData, setExtractedData] = useState(null);
+  const [isExtracting, setIsExtracting] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // AI suggestions state
   const [aiQuestion, setAiQuestion] = useState('');
@@ -63,17 +67,23 @@ function QuestionManager({ categories }) {
     }
   };
 
-  const handleImageUpload = async (e) => {
-    e.preventDefault();
+  const handleImageReady = (file) => {
+    setImageFile(file);
+    if (!file) {
+      setExtractedData(null);
+    }
+  };
 
+  const handleExtractFromImage = async () => {
     if (!imageFile) {
-      alert('Selecciona una imagen');
+      alert('Selecciona una imagen primero');
       return;
     }
 
+    setIsExtracting(true);
+
     const formData = new FormData();
     formData.append('image', imageFile);
-    formData.append('autoDetectCategory', autoDetectCategory);
 
     try {
       const response = await fetch('/api/admin/questions/import-from-image', {
@@ -81,41 +91,51 @@ function QuestionManager({ categories }) {
         body: formData
       });
 
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error del servidor');
+      }
+
       const data = await response.json();
       setExtractedData(data.result);
     } catch (error) {
       console.error('Error importing from image:', error);
-      alert('Error al procesar la imagen');
+      alert('Error al procesar la imagen: ' + error.message);
+    } finally {
+      setIsExtracting(false);
     }
   };
 
-  const handleSaveExtracted = async () => {
-    if (!extractedData) return;
+  const handleSaveExtractedQuestions = async (questions) => {
+    setIsSaving(true);
 
     try {
-      const response = await fetch('/api/admin/questions', {
+      const response = await fetch('/api/admin/questions/bulk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          categoryId: extractedData.categoryId || categories[0]?.id,
-          text: extractedData.question,
-          answers: extractedData.answers.map((ans, idx) => ({
-            text: ans.text,
-            points: ans.points,
-            position: idx + 1
-          }))
-        })
+        body: JSON.stringify({ questions })
       });
 
-      if (response.ok) {
-        alert('Pregunta guardada exitosamente');
-        setExtractedData(null);
-        setImageFile(null);
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error del servidor');
       }
+
+      const data = await response.json();
+      alert(`${data.count} pregunta(s) guardada(s) exitosamente`);
+      setExtractedData(null);
+      setImageFile(null);
     } catch (error) {
-      console.error('Error saving extracted question:', error);
-      alert('Error al guardar la pregunta');
+      console.error('Error saving questions:', error);
+      alert('Error al guardar las preguntas: ' + error.message);
+    } finally {
+      setIsSaving(false);
     }
+  };
+
+  const handleCancelExtracted = () => {
+    setExtractedData(null);
+    setImageFile(null);
   };
 
   const handleAISuggest = async (e) => {
@@ -174,6 +194,12 @@ function QuestionManager({ categories }) {
 
       <div className="mode-selector">
         <button
+          className={`btn ${activeMode === 'list' ? 'btn-primary' : 'btn-secondary'}`}
+          onClick={() => setActiveMode('list')}
+        >
+          Ver Preguntas
+        </button>
+        <button
           className={`btn ${activeMode === 'manual' ? 'btn-primary' : 'btn-secondary'}`}
           onClick={() => setActiveMode('manual')}
         >
@@ -192,6 +218,10 @@ function QuestionManager({ categories }) {
           Sugerencias IA
         </button>
       </div>
+
+      {activeMode === 'list' && (
+        <QuestionsList categories={categories} />
+      )}
 
       {activeMode === 'manual' && (
         <form onSubmit={handleManualSubmit} className="manual-form">
@@ -265,53 +295,36 @@ function QuestionManager({ categories }) {
 
       {activeMode === 'image' && (
         <div className="image-import">
-          <form onSubmit={handleImageUpload}>
-            <div className="form-group">
-              <label>Subir Imagen</label>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => setImageFile(e.target.files[0])}
-                required
+          {!extractedData ? (
+            <>
+              <ImageInput 
+                onImageReady={handleImageReady}
+                disabled={isExtracting}
+                compressionOptions={{
+                  maxSizeMB: 0.4,
+                  maxWidthOrHeight: 600,
+                  useWebWorker: true,
+                }}
               />
-            </div>
 
-            <div className="form-group">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={autoDetectCategory}
-                  onChange={(e) => setAutoDetectCategory(e.target.checked)}
-                />
-                Detectar categoría automáticamente
-              </label>
-            </div>
-
-            <button type="submit" className="btn btn-primary">
-              Extraer Datos con IA
-            </button>
-          </form>
-
-          {extractedData && (
-            <div className="extracted-preview">
-              <h4>Datos Extraídos (revisa antes de guardar)</h4>
-              <p><strong>Pregunta:</strong> {extractedData.question}</p>
-              <p><strong>Categoría sugerida:</strong> {extractedData.categoryName || 'N/A'}</p>
-              <h5>Respuestas:</h5>
-              <ul>
-                {extractedData.answers.map((ans, idx) => (
-                  <li key={idx}>
-                    {ans.text} - {ans.points} puntos
-                  </li>
-                ))}
-              </ul>
-              <button onClick={handleSaveExtracted} className="btn btn-success">
-                Guardar Pregunta
-              </button>
-              <button onClick={() => setExtractedData(null)} className="btn btn-secondary">
-                Cancelar
-              </button>
-            </div>
+              {imageFile && (
+                <button 
+                  type="button"
+                  className="btn btn-primary extract-btn"
+                  onClick={handleExtractFromImage}
+                  disabled={isExtracting}
+                >
+                  {isExtracting ? '⏳ Extrayendo con IA...' : '🤖 Extraer preguntas con IA'}
+                </button>
+              )}
+            </>
+          ) : (
+            <ExtractedQuestionsForm
+              extractedData={extractedData}
+              onSave={handleSaveExtractedQuestions}
+              onCancel={handleCancelExtracted}
+              isSaving={isSaving}
+            />
           )}
         </div>
       )}
