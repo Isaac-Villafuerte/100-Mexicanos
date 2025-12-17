@@ -4,7 +4,9 @@ import { config } from '../../config/env.js';
 
 /**
  * AI Service for extracting questions from images
- * Uses OpenAI Vision API (gpt-4o) to extract 1-4 question cards from Family Feud images
+ * Uses OpenAI Vision API (gpt-4o) with a 2-step process:
+ * 1. Extract questions/answers from image (no categories)
+ * 2. Categorize questions using text-only call (saves tokens)
  */
 export class ImageQuestionExtractor {
   constructor() {
@@ -28,43 +30,111 @@ export class ImageQuestionExtractor {
     }
 
     try {
-      const imageBuffer = fs.readFileSync(imagePath);
-      const base64Image = imageBuffer.toString('base64');
-      const mimeType = this._getMimeType(imagePath);
+      // PASO 1: Extracción de imagen (sin categorías)
+      console.log('[ImageQuestionExtractor] PASO 1: Extrayendo preguntas de imagen...');
+      const extractedQuestions = await this._extractFromImage(imagePath);
+      console.log('[ImageQuestionExtractor] PASO 1 completado:', extractedQuestions.length, 'preguntas extraídas');
 
-      const categoriesContext = existingCategories.length > 0
-        ? `Categorías existentes en la base de datos:\n${existingCategories.map(c => `- "${c.name}"${c.description ? `: ${c.description}` : ''}`).join('\n')}`
-        : 'No hay categorías existentes en la base de datos.';
+      // PASO 2: Categorización por texto
+      console.log('[ImageQuestionExtractor] PASO 2: Categorizando preguntas...');
+      let categorizedQuestions;
+      try {
+        categorizedQuestions = await this._categorizeQuestions(extractedQuestions, existingCategories);
+        console.log('[ImageQuestionExtractor] PASO 2 completado');
+      } catch (catError) {
+        console.error('[ImageQuestionExtractor] Error en PASO 2, usando fallback:', catError.message);
+        categorizedQuestions = this._fallbackCategories(extractedQuestions);
+      }
 
-      const systemPrompt = `Eres un experto en extraer información de imágenes del juego "100 Mexicanos Dijeron" (Family Feud mexicano).
+      console.log('[ImageQuestionExtractor] Resultado final:', JSON.stringify(categorizedQuestions, null, 2));
+      return categorizedQuestions;
+
+    } catch (error) {
+      console.error('[ImageQuestionExtractor] Error:', error);
+      throw new Error(`Error al procesar la imagen con IA: ${error.message}`);
+    }
+  }
+
+  /**
+   * PASO 1: Extract questions and answers from image (no categories)
+   */
+  async _extractFromImage(imagePath) {
+    const imageBuffer = fs.readFileSync(imagePath);
+    const base64Image = imageBuffer.toString('base64');
+    const mimeType = this._getMimeType(imagePath);
+
+    const systemPrompt = this._buildExtractPrompt();
+
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: 'Extrae todas las preguntas y respuestas de esta imagen. Responde SOLO con JSON válido.' },
+            { type: 'image_url', image_url: { url: `data:${mimeType};base64,${base64Image}` } }
+          ]
+        }
+      ],
+      max_tokens: 4096,
+      temperature: 0.1
+    });
+
+    const content = response.choices[0].message.content;
+    const parsed = this._parseJson(content);
+    return parsed.questions || [];
+  }
+
+  /**
+   * PASO 2: Categorize questions using text-only call
+   */
+  async _categorizeQuestions(extractedQuestions, existingCategories) {
+    if (extractedQuestions.length === 0) {
+      return [];
+    }
+
+    const compactText = this._toCompactQuestionsText(extractedQuestions);
+    const systemPrompt = this._buildCategorizePrompt(existingCategories);
+
+    const response = await this.openai.chat.completions.create({
+      model: 'gpt-4o',
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: compactText }
+      ],
+      max_tokens: 2000,
+      temperature: 0.6
+    });
+
+    const content = response.choices[0].message.content;
+    const parsed = this._parseJson(content);
+    const categories = parsed.categories || [];
+
+    // Merge categories with extracted questions
+    return this._mergeCategories(extractedQuestions, categories, existingCategories);
+  }
+
+  /**
+   * Build prompt for PASO 1: Extraction only (no categories)
+   */
+  _buildExtractPrompt() {
+    return `Eres un experto en extraer información de imágenes del juego "100 Mexicanos Dijeron" (Family Feud mexicano).
 
 La imagen puede contener de 1 a 4 tarjetas de preguntas. Cada tarjeta tiene:
 - Una pregunta
 - De 1 a 8 respuestas con sus puntos asociados
 
-Tu tarea:
-1. Extraer TODAS las preguntas visibles (1-4 tarjetas)
-2. Para cada pregunta, extraer todas las respuestas con sus puntos
-3. Asignar una categoría a cada pregunta
+Tu tarea: Extraer TODAS las preguntas visibles con sus respuestas y puntos.
+NO asignes categorías, solo extrae la información visible.
 
-${categoriesContext}
+IMPORTANTE: Responde SOLO con JSON válido, sin markdown, sin explicaciones.
 
-Para las categorías:
-- Si la pregunta encaja bien en una categoría existente, usa esa categoría (isNew: false, incluye el nombre exacto)
-- Si ninguna categoría existente aplica o no encaja o no hay, propón una nueva categoría con nombre y descripción breve (isNew: true)
-
-IMPORTANTE: Responde SOLO con un JSON válido, sin markdown, sin explicaciones adicionales.
-
-Formato de respuesta JSON:
+Formato de respuesta:
 {
   "questions": [
     {
       "question": "texto de la pregunta",
-      "category": {
-        "name": "nombre de categoría",
-        "description": "descripción breve (solo si isNew es true)",
-        "isNew": false
-      },
       "answers": [
         { "text": "respuesta 1", "points": 35 },
         { "text": "respuesta 2", "points": 28 }
@@ -72,71 +142,118 @@ Formato de respuesta JSON:
     }
   ]
 }`;
+  }
 
-      console.log('[ImageQuestionExtractor] System Prompt:', systemPrompt);
-      
-      const response = await this.openai.chat.completions.create({
-        model: 'gpt-4o',
-        messages: [
-          {
-            role: 'system',
-            content: systemPrompt
-          },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'text',
-                text: 'Extrae todas las preguntas y respuestas de esta imagen. Recuerda responder SOLO con JSON válido.'
-              },
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:${mimeType};base64,${base64Image}`,
-                  // detail: 'high'
-                }
-              }
-            ]
-          }
-        ],
-        max_tokens: 4096,
-        temperature: 0.1
-      });
+  /**
+   * Build prompt for PASO 2: Categorization
+   */
+  _buildCategorizePrompt(existingCategories) {
+    const catList = existingCategories.length > 0
+      ? existingCategories.map(c => `- [${c.id}] ${c.name}${c.description ? `: ${c.description}` : ''}`).join('\n')
+      : '(No hay categorías existentes)';
 
-      const content = response.choices[0].message.content;
-      
-      // Parse JSON response (remove potential markdown code blocks)
-      let jsonStr = content.trim();
-      if (jsonStr.startsWith('```')) {
-        jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
-      }
+    return `Eres un experto en categorizar preguntas del juego "100 Mexicanos Dijeron" (Family Feud mexicano).
 
-      const parsed = JSON.parse(jsonStr);
+CATEGORÍAS EXISTENTES:
+${catList}
 
-      // Map category IDs for existing categories
-      const questionsWithCategoryIds = parsed.questions.map(q => {
-        if (!q.category.isNew) {
-          const existingCat = existingCategories.find(
-            c => c.name.toLowerCase() === q.category.name.toLowerCase()
+Objetivo: categorías tipo "modo de juego" (AMPLIAS y reutilizables). Una categoría debe poder agrupar muchas preguntas (ideal: 10+). Evita categorías hiper-específicas (que solo sirvan para 1-3 preguntas). Si la idea suena a respuesta/objeto ("tacos", "WhatsApp", "suegra"), sube al tema padre ("Comida y cocina", "Tecnología y redes", "Familia y relaciones").
+
+Tu tarea: Asignar una categoría a cada pregunta.
+
+REGLAS IMPORTANTES:
+1. Reusar categoría existente SOLO si el encaje es muy alto (>=85% de relevancia)
+2. NO uses categorías genéricas como "General", "Variado", "Otros" si existe una más específica
+3. Si ninguna categoría existente aplica bien, propón una NUEVA con:
+   - name: 1-4 palabras, específico
+   - description: 1 frase breve
+
+Responde SOLO con JSON válido:
+{
+  "categories": [
+    { "index": 0, "category": { "id": 18, "name": "Comida", "isNew": false } },
+    { "index": 1, "category": { "name": "Actividades de ocio", "description": "Cosas que hace la gente en su tiempo libre", "isNew": true } }
+  ]
+}`;
+  }
+
+  /**
+   * Convert extracted questions to compact text format for PASO 2
+   */
+  _toCompactQuestionsText(extractedQuestions) {
+    const lines = ['PREGUNTAS A CATEGORIZAR:'];
+    extractedQuestions.forEach((q, idx) => {
+      const answersStr = q.answers.map(a => `${a.text}(${a.points})`).join('; ');
+      lines.push(`#${idx} ${q.question} | ${answersStr}`);
+    });
+    return lines.join('\n');
+  }
+
+  /**
+   * Merge categories from PASO 2 with extracted questions
+   */
+  _mergeCategories(extractedQuestions, categories, existingCategories) {
+    return extractedQuestions.map((q, idx) => {
+      const catInfo = categories.find(c => c.index === idx);
+      let category;
+
+      if (catInfo && catInfo.category) {
+        category = { ...catInfo.category };
+
+        // If isNew is false but no id, try to find by name
+        if (!category.isNew && !category.id) {
+          const match = existingCategories.find(
+            c => c.name.toLowerCase() === category.name.toLowerCase()
           );
-          if (existingCat) {
-            q.category.id = existingCat.id;
+          if (match) {
+            category.id = match.id;
           } else {
-            // Category name didn't match exactly, mark as new
-            q.category.isNew = true;
-            q.category.description = q.category.description || `Categoría para preguntas sobre ${q.category.name.toLowerCase()}`;
+            // Convert to new if no match found
+            category.isNew = true;
+            category.description = category.description || `Categoría para preguntas sobre ${category.name.toLowerCase()}`;
           }
         }
-        return q;
-      });
+      } else {
+        // Fallback if no category assigned
+        category = {
+          name: 'Sin categoría',
+          description: 'Preguntas sin categoría asignada',
+          isNew: true
+        };
+      }
 
-      console.log('[ImageQuestionExtractor] AI Response:', JSON.stringify(questionsWithCategoryIds, null, 2));
-      return questionsWithCategoryIds;
+      return {
+        question: q.question,
+        category,
+        answers: q.answers
+      };
+    });
+  }
 
-    } catch (error) {
-      console.error('[ImageQuestionExtractor] Error:', error);
-      throw new Error(`Error al procesar la imagen con IA: ${error.message}`);
+  /**
+   * Fallback categories if PASO 2 fails
+   */
+  _fallbackCategories(extractedQuestions) {
+    return extractedQuestions.map(q => ({
+      question: q.question,
+      category: {
+        name: 'Sin categoría',
+        description: 'Categoría temporal - error en categorización automática',
+        isNew: true
+      },
+      answers: q.answers
+    }));
+  }
+
+  /**
+   * Parse JSON response, handling markdown code blocks
+   */
+  _parseJson(content) {
+    let jsonStr = content.trim();
+    if (jsonStr.startsWith('```')) {
+      jsonStr = jsonStr.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '');
     }
+    return JSON.parse(jsonStr);
   }
 
   _getMimeType(filePath) {

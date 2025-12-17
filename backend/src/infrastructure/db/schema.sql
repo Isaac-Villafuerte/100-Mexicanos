@@ -89,11 +89,29 @@ CREATE TABLE IF NOT EXISTS round_answer_state (
 ) ENGINE=InnoDB;
 
 -- Insert some default categories
-INSERT INTO categories (name, description) VALUES 
-  ('General', 'Preguntas de cultura general'),
-  ('Familia', 'Preguntas sobre la vida familiar'),
-  ('Comida', 'Preguntas sobre alimentos y bebidas'),
-  ('Entretenimiento', 'Preguntas sobre películas, música y TV');
+-- Categorías sugeridas (modo de juego)
+INSERT INTO categories (name, description) VALUES
+  ('Comida y cocina', 'Alimentos, bebidas, cocinar, antojos y hábitos al comer'),
+  ('Familia y relaciones', 'Parientes, convivencia familiar, roles y dinámicas entre familiares'),
+  ('Pareja y amor', 'Citas, romance, convivencia en pareja, conflictos y detalles amorosos'),
+  ('Trabajo y dinero', 'Empleo, oficios, ingresos, gastos, deudas y finanzas personales'),
+  ('Escuela y estudio', 'Tareas, exámenes, materias, maestros, vida estudiantil y aprendizaje'),
+  ('Hogar y rutina', 'Actividades diarias en casa, limpieza, organización y costumbres'),
+  ('Salud y cuerpo', 'Síntomas, hábitos saludables, cuidado personal, cuerpo y bienestar'),
+  ('Ocio y entretenimiento', 'TV, música, juegos, pasatiempos, salir y diversión'),
+  ('Tecnología y redes', 'Celular, apps, internet, redes sociales, gadgets y uso digital'),
+  ('Compras y consumo', 'Supermercado, tiendas, marcas, gastos comunes y decisiones de compra'),
+  ('Viajes y transporte', 'Traslados, tráfico, transporte público, carretera, vacaciones y viajes'),
+  ('Fiestas y celebraciones', 'Cumpleaños, reuniones, eventos, tradiciones y festejos'),
+  ('Deportes y hobbies', 'Actividades deportivas, ejercicio, aficiones y tiempo libre activo'),
+  ('México y cultura', 'Costumbres mexicanas, comida típica, tradiciones, referencias culturales'),
+  ('Animales y mascotas', 'Mascotas, cuidados, comportamientos de animales y vida con ellos'),
+  ('Naturaleza y clima', 'Clima, estaciones, fenómenos naturales, campo y ambiente'),
+  ('Emociones y hábitos', 'Conductas comunes, manías, rutinas mentales y reacciones emocionales'),
+  ('Miedos y supersticiones', 'Fobias, sustos, creencias, supersticiones y cosas que dan miedo'),
+  ('Lugares y ciudad', 'Sitios, espacios públicos, negocios, colonias, ciudad y vida urbana'),
+  ('Lenguaje y dichos', 'Frases, expresiones, palabras comunes, modismos y dichos');
+
 
 -- Insert a sample question
 INSERT INTO questions (category_id, text) VALUES 
