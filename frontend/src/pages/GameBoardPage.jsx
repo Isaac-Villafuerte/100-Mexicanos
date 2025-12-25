@@ -1,7 +1,8 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import '../styles/pages/_board.scss';
+import '../styles/pages/_buzzer.scss';
 
 function GameBoardPage() {
   const { gameId } = useParams();
@@ -11,7 +12,9 @@ function GameBoardPage() {
   const strikeSound = useRef(null);
   const roundEndSound = useRef(null);
   const gameStartSound = useRef(null);
+  const buzzerSound = useRef(null);
   const prevGameStateRef = useRef(null);
+  const [buzzerWinner, setBuzzerWinner] = useState(null);
 
   const playSound = (soundRef) => {
     if (!soundRef?.current) return;
@@ -32,9 +35,10 @@ function GameBoardPage() {
     strikeSound.current = new Audio('/sounds/incorrecto.mp3');
     roundEndSound.current = new Audio('/sounds/triunfo_fadeout.mp3');
     gameStartSound.current = new Audio('/sounds/a_jugar_fadeout.mp3');
+    buzzerSound.current = new Audio('/sounds/boton.mp3');
 
     return () => {
-      [correctSound, strikeSound, roundEndSound, gameStartSound].forEach((ref) => {
+      [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
         if (ref.current) {
           try {
             ref.current.pause();
@@ -106,6 +110,32 @@ function GameBoardPage() {
     };
   }, [socket]);
 
+  // Buzzer winner effect
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBuzzerWinner = ({ team }) => {
+      setBuzzerWinner(team);
+      playSound(buzzerSound);
+      // Auto-clear after 5 seconds
+      setTimeout(() => {
+        setBuzzerWinner(null);
+      }, 5000);
+    };
+
+    const handleBuzzerReset = () => {
+      setBuzzerWinner(null);
+    };
+
+    socket.on('BUZZER_WINNER', handleBuzzerWinner);
+    socket.on('BUZZER_RESET', handleBuzzerReset);
+
+    return () => {
+      socket.off('BUZZER_WINNER', handleBuzzerWinner);
+      socket.off('BUZZER_RESET', handleBuzzerReset);
+    };
+  }, [socket]);
+
   if (!isConnected) {
     return (
       <div className="board-loading">
@@ -126,6 +156,15 @@ function GameBoardPage() {
 
   return (
     <div className="game-board">
+      {/* Buzzer Winner Overlay */}
+      {buzzerWinner && (
+        <div className={`buzzer-winner-overlay team-${buzzerWinner.toLowerCase()}-winner`}>
+          <span className={`winner-text team-${buzzerWinner.toLowerCase()}`}>
+            {buzzerWinner === 'A' ? teamA.name : teamB.name}
+          </span>
+        </div>
+      )}
+
       <header className="board-header">
         <h1 className="board-title">{title}</h1>
       </header>

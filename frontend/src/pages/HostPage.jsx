@@ -1,10 +1,55 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
+import { useEffect, useState, useRef } from 'react';
 import '../styles/pages/_host.scss';
+import '../styles/pages/_buzzer.scss';
 
 function HostPage() {
   const { gameId } = useParams();
-  const { gameState, isConnected, emit } = useSocket(gameId, 'host');
+  const { gameState, isConnected, emit, socket } = useSocket(gameId, 'host');
+  const [buzzerWinner, setBuzzerWinner] = useState(null);
+  const buzzerSound = useRef(null);
+
+  useEffect(() => {
+    buzzerSound.current = new Audio('/sounds/boton.mp3');
+    return () => {
+      if (buzzerSound.current) {
+        buzzerSound.current.pause();
+        buzzerSound.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleBuzzerWinner = ({ team }) => {
+      setBuzzerWinner(team);
+      if (buzzerSound.current) {
+        buzzerSound.current.currentTime = 0;
+        buzzerSound.current.play().catch(() => {});
+      }
+      setTimeout(() => {
+        setBuzzerWinner(null);
+      }, 5000);
+    };
+
+    const handleBuzzerReset = () => {
+      setBuzzerWinner(null);
+    };
+
+    socket.on('BUZZER_WINNER', handleBuzzerWinner);
+    socket.on('BUZZER_RESET', handleBuzzerReset);
+
+    return () => {
+      socket.off('BUZZER_WINNER', handleBuzzerWinner);
+      socket.off('BUZZER_RESET', handleBuzzerReset);
+    };
+  }, [socket]);
+
+  const handleBuzzerReset = () => {
+    emit('BUZZER_MANUAL_RESET', { gameId });
+  };
 
   const handleRevealAnswer = (answerId) => {
     emit('REVEAL_ANSWER', {
@@ -84,6 +129,15 @@ function HostPage() {
 
   return (
     <div className="host-page">
+      {/* Buzzer Winner Overlay */}
+      {buzzerWinner && (
+        <div className={`buzzer-winner-overlay team-${buzzerWinner.toLowerCase()}-winner`}>
+          <span className={`winner-text team-${buzzerWinner.toLowerCase()}`}>
+            {buzzerWinner === 'A' ? teamA.name : teamB.name}
+          </span>
+        </div>
+      )}
+
       <header className="host-header">
         <h1>{title}</h1>
         <div className="game-info">
@@ -198,6 +252,35 @@ function HostPage() {
             <h2>No hay ronda activa</h2>
           </div>
         )}
+
+        <section className="buzzer-control">
+          <h3>Control de Botonera</h3>
+          <div className="buzzer-status">
+            {buzzerWinner ? (
+              <p className={`winner-indicator team-${buzzerWinner.toLowerCase()}`}>
+                🔔 {buzzerWinner === 'A' ? teamA.name : teamB.name} presionó primero
+              </p>
+            ) : (
+              <p>Esperando presión de botón...</p>
+            )}
+          </div>
+          <button
+            onClick={handleBuzzerReset}
+            className="btn btn-secondary"
+          >
+            Resetear Botonera
+          </button>
+          <div className="buzzer-links">
+            <p><strong>Enlaces de botonera:</strong></p>
+            <small>
+              <span>Dual: /buzzer/{gameId}</span>
+              <span> | </span>
+              <span>Equipo A: /buzzer/{gameId}/a</span>
+              <span> | </span>
+              <span>Equipo B: /buzzer/{gameId}/b</span>
+            </small>
+          </div>
+        </section>
 
         <section className="round-navigation">
           <h3>Navegación de Rondas</h3>

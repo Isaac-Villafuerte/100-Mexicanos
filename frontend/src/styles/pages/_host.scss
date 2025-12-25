@@ -145,6 +145,63 @@
   }
 }
 
+.buzzer-control {
+  @include card;
+  margin-bottom: $spacing-xl;
+  border-left: 4px solid #ffc107;
+
+  h3 {
+    margin-bottom: $spacing-md;
+    color: $text-dark;
+  }
+
+  .buzzer-status {
+    padding: $spacing-md;
+    background: $bg-light;
+    border-radius: $border-radius;
+    margin-bottom: $spacing-md;
+
+    p {
+      margin: 0;
+      font-size: $font-size-lg;
+    }
+
+    .winner-indicator {
+      font-weight: bold;
+      animation: pulse-text 0.5s ease-in-out infinite alternate;
+
+      &.team-a {
+        color: #1976d2;
+      }
+
+      &.team-b {
+        color: #d32f2f;
+      }
+    }
+  }
+
+  .buzzer-links {
+    margin-top: $spacing-md;
+    padding: $spacing-md;
+    background: #f0f4f8;
+    border-radius: $border-radius;
+
+    p {
+      margin-bottom: $spacing-xs;
+    }
+
+    small {
+      color: $secondary-color;
+      font-family: monospace;
+    }
+  }
+}
+
+@keyframes pulse-text {
+  0% { opacity: 1; }
+  100% { opacity: 0.6; }
+}
+
 .round-navigation {
   @include card;
 
