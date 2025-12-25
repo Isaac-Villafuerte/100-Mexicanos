@@ -1,10 +1,17 @@
 import { Server } from 'socket.io';
+import { config } from '../../config/env.js';
 
 export function createSocketServer(httpServer, dependencies) {
+  // Configuración CORS para Socket.IO
+  const corsOrigin = config.corsOrigins.length > 0 
+    ? config.corsOrigins 
+    : (config.nodeEnv === 'development' ? '*' : false);
+
   const io = new Server(httpServer, {
     cors: {
-      origin: '*',
-      methods: ['GET', 'POST']
+      origin: corsOrigin,
+      methods: ['GET', 'POST'],
+      credentials: true
     }
   });
 

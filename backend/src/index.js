@@ -1,4 +1,5 @@
 import http from 'http';
+import './logger.js'; // Captura console.log y errores desde el inicio
 import { config } from './config/env.js';
 import { testConnection } from './infrastructure/db/mysqlClient.js';
 import { createExpressApp } from './infrastructure/http/expressApp.js';
@@ -24,6 +25,7 @@ import { CreateQuestionUseCase } from './application/usecases/CreateQuestionUseC
 import { ImportQuestionFromImageUseCase } from './application/usecases/ImportQuestionFromImageUseCase.js';
 import { SuggestAnswersWithAIUseCase } from './application/usecases/SuggestAnswersWithAIUseCase.js';
 import { GetGameStateUseCase } from './application/usecases/GetGameStateUseCase.js';
+import logger from './logger.js';
 
 async function bootstrap() {
   console.log('🚀 Starting 100 Mexicanos Dijeron backend...');
@@ -80,6 +82,9 @@ async function bootstrap() {
 
   // Create Express app
   const app = createExpressApp(dependencies);
+
+  // Configure logger routes
+  logger(app);
 
   // Create HTTP server
   const httpServer = http.createServer(app);

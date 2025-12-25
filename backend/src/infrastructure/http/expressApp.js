@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { config } from '../../config/env.js';
 import { gameRoutes } from './routes/gameRoutes.js';
 import { adminRoutes } from './routes/adminRoutes.js';
 
@@ -11,8 +12,33 @@ const __dirname = path.dirname(__filename);
 export function createExpressApp(dependencies) {
   const app = express();
 
+  // CORS Configuration
+  const corsOptions = {
+    origin: (origin, callback) => {
+      // Permitir requests sin origin (como Postman, curl, o mismo servidor)
+      if (!origin) return callback(null, true);
+      
+      // En desarrollo, permitir todo si no hay orígenes configurados
+      if (config.nodeEnv === 'development' && config.corsOrigins.length === 0) {
+        return callback(null, true);
+      }
+      
+      // Verificar si el origen está en la lista permitida
+      if (config.corsOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Origin no permitido
+      console.warn(`CORS bloqueado para origen: ${origin}`);
+      callback(new Error('No permitido por CORS'));
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+  };
+
   // Middleware
-  app.use(cors());
+  app.use(cors(corsOptions));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
