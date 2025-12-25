@@ -28,20 +28,47 @@ function HomePage() {
               onChange={(e) => setGameId(e.target.value)}
               className="input"
             />
-            <button
-              className="btn btn-secondary"
-              onClick={() => gameId && navigate(`/board/${gameId}`)}
-              disabled={!gameId}
-            >
-              Ver Tablero
-            </button>
-            <button
-              className="btn btn-accent"
-              onClick={() => gameId && navigate(`/host/${gameId}`)}
-              disabled={!gameId}
-            >
-              Pantalla de Presentador
-            </button>
+            <div className="game-buttons">
+              <button
+                className="btn btn-secondary"
+                onClick={() => gameId && navigate(`/board/${gameId}`)}
+                disabled={!gameId}
+              >
+                Ver Tablero
+              </button>
+              <button
+                className="btn btn-accent"
+                onClick={() => gameId && navigate(`/host/${gameId}`)}
+                disabled={!gameId}
+              >
+                Pantalla de Presentador
+              </button>
+            </div>
+            
+            <div className="buzzer-buttons">
+              <p className="buzzer-label">Botoneras:</p>
+              <button
+                className="btn btn-buzzer-dual"
+                onClick={() => gameId && navigate(`/buzzer/${gameId}`)}
+                disabled={!gameId}
+              >
+                🔔 Dual (2 botones)
+              </button>
+              <button
+                className="btn btn-buzzer-a"
+                onClick={() => gameId && navigate(`/buzzer/${gameId}/a`)}
+                disabled={!gameId}
+              >
+                🔵 Equipo A
+              </button>
+              <button
+                className="btn btn-buzzer-b"
+                onClick={() => gameId && navigate(`/buzzer/${gameId}/b`)}
+                disabled={!gameId}
+              >
+                🔴 Equipo B
+              </button>
+            </div>
           </div>
         </div>
 

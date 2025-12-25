@@ -35,6 +35,76 @@
 .game-join {
   @include flex-column;
   gap: $spacing-md;
+
+  .game-buttons {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .buzzer-buttons {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding-top: $spacing-md;
+    border-top: 1px dashed #cbd5e1;
+
+    .buzzer-label {
+      width: 100%;
+      text-align: center;
+      font-size: $font-size-sm;
+      color: $secondary-color;
+      margin-bottom: $spacing-xs;
+    }
+  }
+}
+
+.btn-buzzer-dual {
+  background: linear-gradient(135deg, #1976d2 50%, #d32f2f 50%);
+  color: white;
+  border: none;
+  
+  &:hover:not(:disabled) {
+    filter: brightness(1.1);
+  }
+
+  &:disabled {
+    background: #ccc;
+    color: #888;
+  }
+}
+
+.btn-buzzer-a {
+  background: #1976d2;
+  color: white;
+  border: none;
+  
+  &:hover:not(:disabled) {
+    background: #1565c0;
+  }
+
+  &:disabled {
+    background: #90caf9;
+    color: #ccc;
+  }
+}
+
+.btn-buzzer-b {
+  background: #d32f2f;
+  color: white;
+  border: none;
+  
+  &:hover:not(:disabled) {
+    background: #c62828;
+  }
+
+  &:disabled {
+    background: #ef9a9a;
+    color: #ccc;
+  }
 }
 
 .home-instructions {

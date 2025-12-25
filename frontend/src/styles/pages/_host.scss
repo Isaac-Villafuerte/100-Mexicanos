@@ -1,169 +1,366 @@
 @import '../variables';
 @import '../mixins';
 
+// ==========================================
+// HOST PAGE - Mobile First & Compact
+// ==========================================
+
 .host-page {
   min-height: 100vh;
-  background: $bg-light;
+  background: #1a1a2e;
 }
 
 .host-header {
-  background: $primary-color;
+  background: linear-gradient(135deg, $primary-color, darken($primary-color, 10%));
   color: $text-light;
-  padding: $spacing-lg $spacing-xl;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: $spacing-sm $spacing-md;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 
   h1 {
-    font-size: $font-size-2xl;
-    margin-bottom: $spacing-sm;
+    font-size: $font-size-lg;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (min-width: 768px) {
+    padding: $spacing-md $spacing-xl;
+    h1 { font-size: $font-size-xl; }
   }
 }
 
 .game-info {
   display: flex;
-  gap: $spacing-lg;
-  font-size: $font-size-base;
+  gap: $spacing-sm;
+  font-size: $font-size-sm;
+  flex-wrap: wrap;
 }
 
 .status {
-  padding: $spacing-xs $spacing-md;
+  padding: 2px $spacing-sm;
   background: rgba(255, 255, 255, 0.2);
   border-radius: $border-radius;
   text-transform: uppercase;
   font-weight: 600;
+  font-size: $font-size-xs;
 }
 
 .host-content {
-  padding: $spacing-xl;
-  max-width: 1400px;
+  padding: $spacing-sm;
+  max-width: 1200px;
   margin: 0 auto;
+
+  @media (min-width: 768px) {
+    padding: $spacing-md;
+  }
 }
 
 .round-control {
-  @include card;
-  margin-bottom: $spacing-xl;
+  background: #16213e;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-sm;
+
+  @media (min-width: 768px) {
+    padding: $spacing-md;
+    margin-bottom: $spacing-md;
+  }
 }
 
 .round-header {
-  padding-bottom: $spacing-lg;
-  border-bottom: 2px solid #e2e8f0;
-  margin-bottom: $spacing-lg;
+  padding-bottom: $spacing-sm;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: $spacing-sm;
 
   h2 {
-    font-size: $font-size-xl;
-    color: $text-dark;
-    margin-bottom: $spacing-sm;
+    font-size: $font-size-base;
+    color: white;
+    margin-bottom: $spacing-xs;
+    line-height: 1.3;
   }
 
   span {
     display: inline-block;
-    margin-right: $spacing-md;
-    padding: $spacing-xs $spacing-md;
-    background: $bg-light;
-    border-radius: $border-radius;
-    font-size: $font-size-sm;
+    margin-right: $spacing-xs;
+    padding: 2px $spacing-xs;
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+    font-size: $font-size-xs;
+    color: #a0aec0;
+  }
+
+  @media (min-width: 768px) {
+    h2 { font-size: $font-size-lg; }
+    span { font-size: $font-size-sm; padding: $spacing-xs $spacing-sm; }
   }
 }
 
-.answers-control {
-  margin-bottom: $spacing-xl;
+// ==========================================
+// ANSWERS - Encendidas/Apagadas
+// ==========================================
 
-  h3 {
-    margin-bottom: $spacing-md;
-    color: $text-dark;
-  }
+.answers-control {
+  margin-bottom: $spacing-sm;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .answer-control-row {
   display: grid;
-  grid-template-columns: 50px 2fr 80px 120px 120px;
+  grid-template-columns: 28px 1fr 60px;
   align-items: center;
-  gap: $spacing-md;
-  padding: $spacing-md;
-  background: $bg-light;
-  border-radius: $border-radius;
-  margin-bottom: $spacing-sm;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
 
-  @include mobile {
-    grid-template-columns: 1fr;
+  // APAGADA (oculta) - legible pero tenue
+  &.hidden {
+    background: rgba(100, 100, 120, 0.3);
+    color: #8892a0;
+    border: 1px solid rgba(100, 100, 120, 0.3);
+
+    .answer-pos {
+      background: rgba(100, 100, 120, 0.5);
+      color: #6b7280;
+    }
+
+    .answer-points {
+      color: #6b7280;
+    }
+
+    &:hover {
+      background: rgba(100, 100, 120, 0.5);
+      border-color: rgba(150, 150, 170, 0.5);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  // ENCENDIDA (revelada) - brillante y visible
+  &.revealed {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+    border: 1px solid #22c55e;
+    box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
+
+    .answer-pos {
+      background: rgba(255, 255, 255, 0.3);
+      color: white;
+    }
+
+    .answer-text {
+      font-weight: 600;
+    }
+
+    .answer-points {
+      color: white;
+      font-weight: bold;
+    }
+
+    &:hover {
+      filter: brightness(1.1);
+    }
+
+    &:active {
+      transform: scale(0.98);
+    }
+  }
+
+  @media (min-width: 768px) {
+    grid-template-columns: 36px 1fr 80px;
+    padding: $spacing-sm $spacing-md;
   }
 }
 
 .answer-pos {
   font-weight: bold;
-  font-size: $font-size-lg;
-}
-
-.answer-status {
   font-size: $font-size-sm;
-  
-  &.revealed {
-    color: $success-color;
-  }
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.2);
 
-  &.hidden {
-    color: $secondary-color;
+  @media (min-width: 768px) {
+    width: 28px;
+    height: 28px;
+    font-size: $font-size-base;
   }
 }
+
+.answer-text {
+  font-size: $font-size-sm;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  @media (min-width: 768px) {
+    font-size: $font-size-base;
+  }
+}
+
+.answer-points {
+  font-size: $font-size-xs;
+  text-align: right;
+
+  @media (min-width: 768px) {
+    font-size: $font-size-sm;
+  }
+}
+
+// ==========================================
+// TEAM CONTROL - Compacto con iluminación en turno
+// ==========================================
 
 .team-control {
-  margin-bottom: $spacing-xl;
-
-  h3 {
-    margin-bottom: $spacing-md;
-    color: $text-dark;
-  }
+  margin-bottom: $spacing-sm;
 }
 
 .team-buttons {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: $spacing-xl;
+  gap: $spacing-xs;
 
-  @include mobile {
-    grid-template-columns: 1fr;
+  @media (min-width: 768px) {
+    gap: $spacing-md;
   }
 }
 
 .team-section {
-  @include card;
-  background: $bg-light;
+  background: #1e293b;
+  border-radius: 8px;
+  padding: $spacing-xs;
+  border: 2px solid transparent;
+  transition: all 0.3s ease;
 
-  h4 {
-    font-size: $font-size-lg;
-    margin-bottom: $spacing-sm;
-    color: $text-dark;
+  &.team-a-section {
+    &.in-turn {
+      border-color: #3b82f6;
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(59, 130, 246, 0.05));
+      box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), inset 0 0 20px rgba(59, 130, 246, 0.1);
+      animation: glow-blue 1.5s ease-in-out infinite alternate;
+    }
   }
 
-  p {
-    margin-bottom: $spacing-md;
-    color: $secondary-color;
+  &.team-b-section {
+    &.in-turn {
+      border-color: #ef4444;
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(239, 68, 68, 0.05));
+      box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), inset 0 0 20px rgba(239, 68, 68, 0.1);
+      animation: glow-red 1.5s ease-in-out infinite alternate;
+    }
   }
 
-  button {
-    width: 100%;
-    margin-bottom: $spacing-sm;
+  @media (min-width: 768px) {
+    padding: $spacing-sm;
   }
 }
 
+@keyframes glow-blue {
+  0% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.3); }
+  100% { box-shadow: 0 0 25px rgba(59, 130, 246, 0.6); }
+}
+
+@keyframes glow-red {
+  0% { box-shadow: 0 0 15px rgba(239, 68, 68, 0.3); }
+  100% { box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); }
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: $spacing-xs;
+
+  h4 {
+    font-size: $font-size-sm;
+    color: white;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .strikes-badge {
+    color: #ef4444;
+    font-weight: bold;
+    font-size: $font-size-lg;
+    letter-spacing: 2px;
+    min-width: 40px;
+    text-align: right;
+  }
+
+  @media (min-width: 768px) {
+    h4 { font-size: $font-size-base; }
+  }
+}
+
+.team-actions {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+
+  .btn-compact {
+    flex: 1;
+    min-width: 40px;
+    padding: $spacing-xs;
+    font-size: $font-size-xs;
+
+    @media (min-width: 768px) {
+      padding: $spacing-xs $spacing-sm;
+      font-size: $font-size-sm;
+    }
+  }
+}
+
+// ==========================================
+// BUZZER CONTROL - Compacto
+// ==========================================
+
 .buzzer-control {
-  @include card;
-  margin-bottom: $spacing-xl;
-  border-left: 4px solid #ffc107;
+  background: #16213e;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  margin-bottom: $spacing-sm;
+  border-left: 3px solid #ffc107;
 
   h3 {
-    margin-bottom: $spacing-md;
-    color: $text-dark;
+    margin-bottom: $spacing-xs;
+    font-size: $font-size-sm;
+    color: white;
+
+    @media (min-width: 768px) {
+      font-size: $font-size-base;
+      margin-bottom: $spacing-sm;
+    }
   }
 
   .buzzer-status {
-    padding: $spacing-md;
-    background: $bg-light;
+    padding: $spacing-xs;
+    background: rgba(255,255,255,0.05);
     border-radius: $border-radius;
-    margin-bottom: $spacing-md;
+    margin-bottom: $spacing-xs;
 
     p {
       margin: 0;
-      font-size: $font-size-lg;
+      font-size: $font-size-sm;
+      color: #a0aec0;
+
+      @media (min-width: 768px) {
+        font-size: $font-size-base;
+      }
     }
 
     .winner-indicator {
@@ -171,28 +368,32 @@
       animation: pulse-text 0.5s ease-in-out infinite alternate;
 
       &.team-a {
-        color: #1976d2;
+        color: #3b82f6;
       }
 
       &.team-b {
-        color: #d32f2f;
+        color: #ef4444;
       }
     }
   }
 
   .buzzer-links {
-    margin-top: $spacing-md;
-    padding: $spacing-md;
-    background: #f0f4f8;
+    margin-top: $spacing-xs;
+    padding: $spacing-xs;
+    background: rgba(255,255,255,0.05);
     border-radius: $border-radius;
 
     p {
-      margin-bottom: $spacing-xs;
+      margin-bottom: 2px;
+      font-size: $font-size-xs;
+      color: white;
     }
 
     small {
-      color: $secondary-color;
+      color: #64748b;
       font-family: monospace;
+      font-size: 10px;
+      word-break: break-all;
     }
   }
 }
@@ -202,25 +403,51 @@
   100% { opacity: 0.6; }
 }
 
+// ==========================================
+// ROUND NAVIGATION - Compacto
+// ==========================================
+
 .round-navigation {
-  @include card;
+  background: #16213e;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
 
   h3 {
-    margin-bottom: $spacing-md;
-    color: $text-dark;
+    margin-bottom: $spacing-xs;
+    font-size: $font-size-sm;
+    color: white;
+
+    @media (min-width: 768px) {
+      font-size: $font-size-base;
+      margin-bottom: $spacing-sm;
+    }
   }
 }
 
 .nav-buttons {
   display: flex;
-  gap: $spacing-md;
+  gap: $spacing-xs;
   flex-wrap: wrap;
+
+  .btn {
+    flex: 1;
+    min-width: 100px;
+    font-size: $font-size-xs;
+    padding: $spacing-xs $spacing-sm;
+
+    @media (min-width: 768px) {
+      font-size: $font-size-sm;
+      padding: $spacing-sm $spacing-md;
+    }
+  }
 }
 
 .no-round,
 .host-loading {
-  @include flex-center;
-  min-height: 50vh;
-  font-size: $font-size-xl;
-  color: $secondary-color;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 30vh;
+  font-size: $font-size-lg;
+  color: #64748b;
 }

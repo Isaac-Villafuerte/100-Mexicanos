@@ -160,88 +160,59 @@ function HostPage() {
               </div>
 
               <div className="answers-control">
-                <h3>Respuestas</h3>
                 {currentRound.answers.map((answer) => (
-                  <div key={answer.id} className="answer-control-row">
+                  <div 
+                    key={answer.id} 
+                    className={`answer-control-row ${answer.isRevealed ? 'revealed' : 'hidden'}`}
+                    onClick={() =>
+                      answer.isRevealed
+                        ? handleHideAnswer(answer.id)
+                        : handleRevealAnswer(answer.id)
+                    }
+                  >
                     <span className="answer-pos">{answer.position}</span>
                     <span className="answer-text">{answer.text}</span>
-                    <span className="answer-points">{answer.points}</span>
-                    <span className={`answer-status ${answer.isRevealed ? 'revealed' : 'hidden'}`}>
-                      {answer.isRevealed ? '👁️ Visible' : '🔒 Oculta'}
-                    </span>
-                    <button
-                      onClick={() =>
-                        answer.isRevealed
-                          ? handleHideAnswer(answer.id)
-                          : handleRevealAnswer(answer.id)
-                      }
-                      className="btn btn-small"
-                    >
-                      {answer.isRevealed ? 'Ocultar' : 'Revelar'}
-                    </button>
+                    <span className="answer-points">{answer.points} pts</span>
                   </div>
                 ))}
               </div>
 
               <div className="team-control">
-                <h3>Control de Equipos</h3>
                 <div className="team-buttons">
-                  <div className="team-section">
-                    <h4>{teamA.name}</h4>
-                    <p>Strikes: {teamA.strikes}/3</p>
-                    <button
-                      onClick={() => handleAddStrike('A')}
-                      className="btn btn-danger"
-                    >
-                      Strike
-                    </button>
-                    <button
-                      onClick={() => handleRemoveStrike('A')}
-                      className="btn btn-secondary"
-                    >
-                      Quitar Strike
-                    </button>
-                    <button
-                      onClick={() => handleSetTeamInTurn('A')}
-                      className={`btn ${currentRound.teamInTurn === 'A' ? 'btn-primary' : 'btn-secondary'}`}
-                    >
-                      {currentRound.teamInTurn === 'A' ? '✓ En turno' : 'Dar turno'}
-                    </button>
-                    <button
-                      onClick={() => handleAssignPoints('A')}
-                      className="btn btn-success"
-                    >
-                      Asignar Puntos
-                    </button>
+                  <div className={`team-section team-a-section ${currentRound.teamInTurn === 'A' ? 'in-turn' : ''}`}>
+                    <div className="team-header">
+                      <h4>{teamA.name}</h4>
+                      <span className="strikes-badge">{'X'.repeat(teamA.strikes)}</span>
+                    </div>
+                    <div className="team-actions">
+                      <button onClick={() => handleAddStrike('A')} className="btn btn-danger btn-compact">+X</button>
+                      <button onClick={() => handleRemoveStrike('A')} className="btn btn-secondary btn-compact">-X</button>
+                      <button
+                        onClick={() => handleSetTeamInTurn('A')}
+                        className={`btn btn-compact ${currentRound.teamInTurn === 'A' ? 'btn-primary' : 'btn-secondary'}`}
+                      >
+                        {currentRound.teamInTurn === 'A' ? '✓ Turno' : 'Turno'}
+                      </button>
+                      <button onClick={() => handleAssignPoints('A')} className="btn btn-success btn-compact">🏆</button>
+                    </div>
                   </div>
 
-                  <div className="team-section">
-                    <h4>{teamB.name}</h4>
-                    <p>Strikes: {teamB.strikes}/3</p>
-                    <button
-                      onClick={() => handleAddStrike('B')}
-                      className="btn btn-danger"
-                    >
-                      Strike
-                    </button>
-                    <button
-                      onClick={() => handleRemoveStrike('B')}
-                      className="btn btn-secondary"
-                    >
-                      Quitar Strike
-                    </button>
-                    <button
-                      onClick={() => handleSetTeamInTurn('B')}
-                      className={`btn ${currentRound.teamInTurn === 'B' ? 'btn-primary' : 'btn-secondary'}`}
-                    >
-                      {currentRound.teamInTurn === 'B' ? '✓ En turno' : 'Dar turno'}
-                    </button>
-                    <button
-                      onClick={() => handleAssignPoints('B')}
-                      className="btn btn-success"
-                    >
-                      Asignar Puntos
-                    </button>
+                  <div className={`team-section team-b-section ${currentRound.teamInTurn === 'B' ? 'in-turn' : ''}`}>
+                    <div className="team-header">
+                      <h4>{teamB.name}</h4>
+                      <span className="strikes-badge">{'X'.repeat(teamB.strikes)}</span>
+                    </div>
+                    <div className="team-actions">
+                      <button onClick={() => handleAddStrike('B')} className="btn btn-danger btn-compact">+X</button>
+                      <button onClick={() => handleRemoveStrike('B')} className="btn btn-secondary btn-compact">-X</button>
+                      <button
+                        onClick={() => handleSetTeamInTurn('B')}
+                        className={`btn btn-compact ${currentRound.teamInTurn === 'B' ? 'btn-primary' : 'btn-secondary'}`}
+                      >
+                        {currentRound.teamInTurn === 'B' ? '✓ Turno' : 'Turno'}
+                      </button>
+                      <button onClick={() => handleAssignPoints('B')} className="btn btn-success btn-compact">🏆</button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -15,6 +15,7 @@ function GameBoardPage() {
   const buzzerSound = useRef(null);
   const prevGameStateRef = useRef(null);
   const [buzzerWinner, setBuzzerWinner] = useState(null);
+  const [strikeOverlay, setStrikeOverlay] = useState(null); // { count: 1|2|3, team: 'A'|'B' }
 
   const playSound = (soundRef) => {
     if (!soundRef?.current) return;
@@ -83,13 +84,21 @@ function GameBoardPage() {
       playSound(correctSound);
     }
 
-    // Strike sound: when strikes increase for either team
+    // Strike sound and overlay: when strikes increase for either team
     const prevStrikesA = prev?.teamA?.strikes ?? 0;
     const prevStrikesB = prev?.teamB?.strikes ?? 0;
     const nextStrikesA = gameState.teamA?.strikes ?? 0;
     const nextStrikesB = gameState.teamB?.strikes ?? 0;
-    if (prev && (nextStrikesA > prevStrikesA || nextStrikesB > prevStrikesB)) {
+    
+    if (prev && nextStrikesA > prevStrikesA) {
       playSound(strikeSound);
+      setStrikeOverlay({ count: nextStrikesA, team: 'A' });
+      setTimeout(() => setStrikeOverlay(null), 2000);
+    }
+    if (prev && nextStrikesB > prevStrikesB) {
+      playSound(strikeSound);
+      setStrikeOverlay({ count: nextStrikesB, team: 'B' });
+      setTimeout(() => setStrikeOverlay(null), 2000);
     }
 
     prevGameStateRef.current = gameState;
@@ -165,13 +174,24 @@ function GameBoardPage() {
         </div>
       )}
 
+      {/* Strike Overlay */}
+      {strikeOverlay && (
+        <div className="strike-overlay">
+          <div className="strike-x-container">
+            {'X'.repeat(strikeOverlay.count).split('').map((x, i) => (
+              <span key={i} className="strike-x">X</span>
+            ))}
+          </div>
+        </div>
+      )}
+
       <header className="board-header">
         <h1 className="board-title">{title}</h1>
       </header>
 
       <div className="board-content">
         {/* Team A Score */}
-        <aside className="team-sidebar team-a">
+        <aside className={`team-sidebar team-a ${currentRound?.teamInTurn === 'A' ? 'in-turn' : ''}`}>
           <div className="team-info">
             <h2>{teamA.name}</h2>
             <div className="team-score">{teamA.score}</div>
@@ -233,7 +253,7 @@ function GameBoardPage() {
         </main>
 
         {/* Team B Score */}
-        <aside className="team-sidebar team-b">
+        <aside className={`team-sidebar team-b ${currentRound?.teamInTurn === 'B' ? 'in-turn' : ''}`}>
           <div className="team-info">
             <h2>{teamB.name}</h2>
             <div className="team-score">{teamB.score}</div>
