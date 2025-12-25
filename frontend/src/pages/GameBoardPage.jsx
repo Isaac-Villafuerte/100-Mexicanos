@@ -31,14 +31,46 @@ function GameBoardPage() {
   };
 
   useEffect(() => {
-    // Initialize audio
-    correctSound.current = new Audio('/sounds/correcto.mp3');
-    strikeSound.current = new Audio('/sounds/incorrecto.mp3');
-    roundEndSound.current = new Audio('/sounds/triunfo_fadeout.mp3');
-    gameStartSound.current = new Audio('/sounds/a_jugar_fadeout.mp3');
-    buzzerSound.current = new Audio('/sounds/boton.mp3');
+    // Initialize audio with preload for better playback
+    const initAudio = (src) => {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      audio.load();
+      return audio;
+    };
+
+    correctSound.current = initAudio('/sounds/correcto.mp3');
+    strikeSound.current = initAudio('/sounds/incorrecto.mp3');
+    roundEndSound.current = initAudio('/sounds/triunfo_fadeout.mp3');
+    gameStartSound.current = initAudio('/sounds/a_jugar_fadeout.mp3');
+    buzzerSound.current = initAudio('/sounds/boton.mp3');
+
+    // Preload all sounds by playing them silently
+    const preloadSounds = () => {
+      [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
+        if (ref.current) {
+          ref.current.volume = 0;
+          ref.current.play().then(() => {
+            ref.current.pause();
+            ref.current.currentTime = 0;
+            ref.current.volume = 1;
+          }).catch(() => {});
+        }
+      });
+    };
+
+    // Try to preload on first user interaction
+    const handleInteraction = () => {
+      preloadSounds();
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
+    };
+    document.addEventListener('click', handleInteraction);
+    document.addEventListener('touchstart', handleInteraction);
 
     return () => {
+      document.removeEventListener('click', handleInteraction);
+      document.removeEventListener('touchstart', handleInteraction);
       [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
         if (ref.current) {
           try {
@@ -163,8 +195,29 @@ function GameBoardPage() {
 
   const { title, teamA, teamB, currentRound } = gameState;
 
+  // Ordenar respuestas por columnas: columna 1 (1,2,3,4) | columna 2 (5,6,7,8)
+  // Distribuidas equitativamente
+  const getOrderedAnswers = (answers) => {
+    if (!answers || answers.length === 0) return { col1: [], col2: [] };
+    const sorted = [...answers].sort((a, b) => a.position - b.position);
+    const half = Math.ceil(sorted.length / 2);
+    return {
+      col1: sorted.slice(0, half),
+      col2: sorted.slice(half)
+    };
+  };
+
+  const orderedAnswers = currentRound ? getOrderedAnswers(currentRound.answers) : { col1: [], col2: [] };
+
   return (
     <div className="game-board">
+      {/* Decorative lights */}
+      <div className="carnival-lights top-lights">
+        {[...Array(20)].map((_, i) => (
+          <span key={i} className="light" style={{ animationDelay: `${i * 0.1}s` }} />
+        ))}
+      </div>
+
       {/* Buzzer Winner Overlay */}
       {buzzerWinner && (
         <div className={`buzzer-winner-overlay team-${buzzerWinner.toLowerCase()}-winner`}>
@@ -187,6 +240,12 @@ function GameBoardPage() {
 
       <header className="board-header">
         <h1 className="board-title">{title}</h1>
+        {/* Round score display */}
+        {currentRound && (
+          <div className="round-points-display">
+            <span className="round-points-value">{currentRound.roundScore}</span>
+          </div>
+        )}
       </header>
 
       <div className="board-content">
@@ -207,25 +266,42 @@ function GameBoardPage() {
                 <div className="round-meta">
                   <span className="category">{currentRound.categoryName}</span>
                   <span className="multiplier">x{currentRound.multiplier}</span>
-                  <span className="round-score">{currentRound.roundScore} pts</span>
                 </div>
               </div>
 
               <div className="answers-grid">
-                {currentRound.answers.map((answer) => (
-                  <div
-                    key={answer.id}
-                    className={`answer-row ${answer.isRevealed ? 'revealed' : 'hidden'}`}
-                  >
-                    <span className="answer-position">{answer.position}</span>
-                    <span className="answer-text">
-                      {answer.isRevealed ? answer.text : ''}
-                    </span>
-                    <span className="answer-points">
-                      {answer.isRevealed ? answer.points : ''}
-                    </span>
-                  </div>
-                ))}
+                <div className="answers-column">
+                  {orderedAnswers.col1.map((answer) => (
+                    <div
+                      key={answer.id}
+                      className={`answer-row ${answer.isRevealed ? 'revealed' : 'hidden'}`}
+                    >
+                      <span className="answer-position">{answer.position}</span>
+                      <span className="answer-text">
+                        {answer.isRevealed ? answer.text : ''}
+                      </span>
+                      <span className="answer-points">
+                        {answer.isRevealed ? answer.points : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div className="answers-column">
+                  {orderedAnswers.col2.map((answer) => (
+                    <div
+                      key={answer.id}
+                      className={`answer-row ${answer.isRevealed ? 'revealed' : 'hidden'}`}
+                    >
+                      <span className="answer-position">{answer.position}</span>
+                      <span className="answer-text">
+                        {answer.isRevealed ? answer.text : ''}
+                      </span>
+                      <span className="answer-points">
+                        {answer.isRevealed ? answer.points : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className="strikes-container">
@@ -259,6 +335,13 @@ function GameBoardPage() {
             <div className="team-score">{teamB.score}</div>
           </div>
         </aside>
+      </div>
+
+      {/* Bottom decorative lights */}
+      <div className="carnival-lights bottom-lights">
+        {[...Array(20)].map((_, i) => (
+          <span key={i} className="light" style={{ animationDelay: `${i * 0.15}s` }} />
+        ))}
       </div>
     </div>
   );
