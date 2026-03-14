@@ -1,9 +1,11 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
+import { useWakeLock } from '../hooks/useWakeLock';
 import { useEffect, useRef, useState } from 'react';
 import '../styles/pages/_buzzer.scss';
 
 function BuzzerDualPage() {
+  useWakeLock();
   const { gameId } = useParams();
   const { gameState, isConnected, emit, socket } = useSocket(gameId, 'buzzer');
   const [winner, setWinner] = useState(null);

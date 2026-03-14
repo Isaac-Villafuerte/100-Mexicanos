@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
+import { useWakeLock } from '../hooks/useWakeLock';
 import { useEffect, useState, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import '../styles/pages/_host.scss';
@@ -7,6 +8,7 @@ import '../styles/pages/_buzzer.scss';
 
 function HostPage() {
   const { gameId } = useParams();
+  useWakeLock();
   const { gameState, isConnected, emit, socket } = useSocket(gameId, 'host');
   const [buzzerWinner, setBuzzerWinner] = useState(null);
   const [showQR, setShowQR] = useState(false);

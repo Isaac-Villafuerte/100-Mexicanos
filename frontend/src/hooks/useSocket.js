@@ -1,8 +1,8 @@
 import { useEffect, useState, useRef } from 'react';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'http://localhost:3000';
-// const SOCKET_URL = 'https://100mexicanos.xido.app';
+// const SOCKET_URL = 'http://localhost:3000';
+const SOCKET_URL = 'https://100mexicanos.xido.app';
 
 export function useSocket(gameId, role = 'viewer') {
   const [gameState, setGameState] = useState(null);

@@ -1,11 +1,13 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
+import { useWakeLock } from '../hooks/useWakeLock';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import '../styles/pages/_board.scss';
 import '../styles/pages/_buzzer.scss';
 
 function GameBoardPage() {
   const { gameId } = useParams();
+  useWakeLock();
   const { gameState, isConnected, socket } = useSocket(gameId, 'board');
   
   const correctSound = useRef(null);
