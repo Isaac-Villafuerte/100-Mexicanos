@@ -456,6 +456,72 @@
 }
 
 // ==========================================
+// THEME SELECTOR
+// ==========================================
+
+.theme-selector-section {
+  background: #16213e;
+  border-radius: $border-radius;
+  padding: $spacing-sm;
+  margin-top: $spacing-sm;
+  border-left: 3px solid $accent-color;
+
+  h3 {
+    font-size: $font-size-sm;
+    color: #a0aec0;
+    margin: 0 0 $spacing-xs 0;
+  }
+}
+
+.theme-buttons {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.btn-theme {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: #a0aec0;
+  font-size: $font-size-sm;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    color: white;
+  }
+
+  &.active {
+    border-color: $accent-color;
+    background: rgba($accent-color, 0.15);
+    color: white;
+  }
+}
+
+.theme-preview {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+
+  &-dark {
+    background: linear-gradient(135deg, #1a1225, #2d1f3d);
+  }
+
+  &-light {
+    background: linear-gradient(135deg, #fef7ed, #fff8f0);
+  }
+}
+
+// ==========================================
 // GAME RESET SECTION
 // ==========================================
 

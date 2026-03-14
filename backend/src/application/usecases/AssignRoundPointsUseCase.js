@@ -35,18 +35,6 @@ export class AssignRoundPointsUseCase {
       teamBScore: game.teamBScore
     });
 
-    // Mark round as finished
-    await this.gameRepository.updateRound(roundId, {
-      state: 'finished'
-    });
-
-    // Check if game is finished
-    if (game.teamAScore >= game.targetScore || game.teamBScore >= game.targetScore) {
-      await this.gameRepository.update(game.id, {
-        status: 'finished'
-      });
-    }
-
     return { game, roundScore, winnerTeam };
   }
 }

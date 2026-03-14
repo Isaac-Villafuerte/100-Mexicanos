@@ -12,6 +12,7 @@ function HostPage() {
   const [showQR, setShowQR] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null); // { team: 'A'|'B' }
   const [showResetModal, setShowResetModal] = useState(false);
+  const [currentTheme, setCurrentTheme] = useState('carnival-dark');
   const [resetForm, setResetForm] = useState({
     teamAScore: 0,
     teamBScore: 0,
@@ -142,6 +143,11 @@ function HostPage() {
       }
     });
     setShowResetModal(false);
+  };
+
+  const handleChangeTheme = (theme) => {
+    setCurrentTheme(theme);
+    emit('CHANGE_THEME', { gameId, theme });
   };
 
   const handleResetScoresToZero = () => {
@@ -358,6 +364,26 @@ function HostPage() {
               className="btn btn-accent"
             >
               Siguiente Ronda (x3)
+            </button>
+          </div>
+        </section>
+
+        <section className="theme-selector-section">
+          <h3>Tema del Board</h3>
+          <div className="theme-buttons">
+            <button
+              className={`btn-theme btn-theme-dark ${currentTheme === 'carnival-dark' ? 'active' : ''}`}
+              onClick={() => handleChangeTheme('carnival-dark')}
+            >
+              <span className="theme-preview theme-preview-dark"></span>
+              Oscuro
+            </button>
+            <button
+              className={`btn-theme btn-theme-light ${currentTheme === 'carnival-light' ? 'active' : ''}`}
+              onClick={() => handleChangeTheme('carnival-light')}
+            >
+              <span className="theme-preview theme-preview-light"></span>
+              Claro
             </button>
           </div>
         </section>

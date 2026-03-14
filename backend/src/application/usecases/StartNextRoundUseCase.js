@@ -12,10 +12,19 @@ export class StartNextRoundUseCase {
       throw new Error('Game not found');
     }
 
-    // Get a random question
-    const question = await this.questionRepository.findRandom(categoryIds);
+    // Finish any current active round before starting a new one
+    const currentRound = await this.gameRepository.findCurrentRound(gameId);
+    if (currentRound) {
+      await this.gameRepository.updateRound(currentRound.id, { state: 'finished' });
+    }
+
+    // Get question IDs already used in this game to avoid repeats
+    const usedQuestionIds = await this.gameRepository.getUsedQuestionIds(gameId);
+
+    // Get a random question excluding already used ones
+    const question = await this.questionRepository.findRandom(categoryIds, usedQuestionIds);
     if (!question) {
-      throw new Error('No questions available');
+      throw new Error('No hay preguntas disponibles (todas ya fueron usadas en este juego)');
     }
 
     // Create new round

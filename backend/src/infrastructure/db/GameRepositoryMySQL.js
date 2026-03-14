@@ -121,6 +121,15 @@ export class GameRepositoryMySQL extends GameRepository {
     });
   }
 
+  async getUsedQuestionIds(gameId) {
+    const pool = getPool();
+    const [rows] = await pool.execute(
+      'SELECT DISTINCT question_id FROM rounds WHERE game_id = ?',
+      [gameId]
+    );
+    return rows.map(row => row.question_id);
+  }
+
   async findCurrentRound(gameId) {
     const pool = getPool();
     const [rows] = await pool.execute(

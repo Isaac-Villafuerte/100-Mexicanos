@@ -18,6 +18,9 @@ export function createSocketServer(httpServer, dependencies) {
   // Estado de botonera por juego: { gameId: { locked: boolean, lockedUntil: number, winner: string|null } }
   const buzzerState = new Map();
 
+  // Tema visual por juego (en memoria)
+  const gameThemes = new Map();
+
   const getBuzzerState = (gameId) => {
     if (!buzzerState.has(gameId)) {
       buzzerState.set(gameId, { locked: false, lockedUntil: 0, winner: null });
@@ -45,6 +48,10 @@ export function createSocketServer(httpServer, dependencies) {
       } catch (error) {
         console.error('Error getting game state:', error);
       }
+
+      // Send current theme
+      const currentTheme = gameThemes.get(gameId) || 'carnival-dark';
+      socket.emit('THEME_CHANGED', { theme: currentTheme });
     });
 
     // Set team in turn
@@ -235,6 +242,13 @@ export function createSocketServer(httpServer, dependencies) {
         socket.emit('ERROR', { message: error.message });
         if (typeof callback === 'function') callback({ success: false, error: error.message });
       }
+    });
+
+    // Change board theme
+    socket.on('CHANGE_THEME', ({ gameId, theme }) => {
+      gameThemes.set(gameId, theme);
+      io.to(`game-${gameId}`).emit('THEME_CHANGED', { theme });
+      console.log(`[THEME] Game ${gameId} theme changed to: ${theme}`);
     });
 
     // BUZZER: Presionar botón del equipo

@@ -88,7 +88,7 @@ export class QuestionRepositoryMySQL extends QuestionRepository {
     return questions;
   }
 
-  async findRandom(categoryIds = []) {
+  async findRandom(categoryIds = [], excludeQuestionIds = []) {
     const pool = getPool();
     let query = 'SELECT id FROM questions WHERE is_active = TRUE';
     const params = [];
@@ -96,6 +96,11 @@ export class QuestionRepositoryMySQL extends QuestionRepository {
     if (categoryIds.length > 0) {
       query += ' AND category_id IN (?)';
       params.push(categoryIds);
+    }
+
+    if (excludeQuestionIds.length > 0) {
+      query += ` AND id NOT IN (${excludeQuestionIds.map(() => '?').join(',')})`;
+      params.push(...excludeQuestionIds);
     }
 
     query += ' ORDER BY RAND() LIMIT 1';

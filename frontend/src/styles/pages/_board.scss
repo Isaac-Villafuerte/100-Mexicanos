@@ -663,3 +663,241 @@ $carnival-purple: #6b4c9a;
     opacity: 0.9;
   }
 }
+
+// ==========================================
+// THEME: CARNIVAL LIGHT
+// ==========================================
+
+$cl-bg: #fef7ed;
+$cl-bg-warm: #fff8f0;
+$cl-gold: #b8860b;
+$cl-gold-light: #d4a853;
+$cl-red: #dc2626;
+$cl-blue: #2563eb;
+$cl-purple: #7c3aed;
+$cl-text: #292524;
+$cl-text-muted: #78716c;
+$cl-card: rgba(255, 255, 255, 0.85);
+$cl-border: rgba(0, 0, 0, 0.12);
+
+.game-board[data-theme="carnival-light"] {
+  background:
+    radial-gradient(ellipse at top, $cl-bg-warm 0%, $cl-bg 50%),
+    linear-gradient(180deg, $cl-bg 0%, #fde8cd 100%);
+  color: $cl-text;
+
+  &::before {
+    background-image:
+      radial-gradient(circle at 20% 80%, rgba($cl-purple, 0.05) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba($cl-gold, 0.08) 0%, transparent 50%);
+  }
+
+  // Lights
+  .carnival-lights .light {
+    background: $cl-gold-light;
+    box-shadow: 0 0 8px $cl-gold-light, 0 0 16px rgba($cl-gold-light, 0.4);
+
+    &:nth-child(odd) {
+      background: $cl-red;
+      box-shadow: 0 0 8px $cl-red, 0 0 16px rgba($cl-red, 0.4);
+    }
+
+    &:nth-child(3n) {
+      background: $cl-blue;
+      box-shadow: 0 0 8px $cl-blue, 0 0 16px rgba($cl-blue, 0.4);
+    }
+  }
+
+  // Header
+  .board-header {
+    background: linear-gradient(180deg, rgba(255,255,255,0.7) 0%, transparent 100%);
+  }
+
+  .board-title {
+    color: $cl-gold;
+    text-shadow:
+      1px 1px 2px rgba(0, 0, 0, 0.15),
+      0 0 15px rgba($cl-gold, 0.2);
+  }
+
+  .round-points-display {
+    background: linear-gradient(135deg, $cl-gold, $cl-gold-light);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow:
+      0 4px 15px rgba(0, 0, 0, 0.15),
+      inset 0 2px 4px rgba(255, 255, 255, 0.3),
+      0 0 20px rgba($cl-gold, 0.2);
+  }
+
+  .round-points-value {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  }
+
+  // Team sidebars
+  .team-sidebar {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: $cl-border;
+    backdrop-filter: blur(10px);
+
+    &.team-a {
+      background: linear-gradient(180deg, rgba($cl-blue, 0.12) 0%, rgba($cl-blue, 0.05) 100%);
+      border-color: rgba($cl-blue, 0.25);
+
+      &.in-turn {
+        border-color: $cl-blue;
+        background: linear-gradient(180deg, rgba($cl-blue, 0.2) 0%, rgba($cl-blue, 0.1) 100%);
+        box-shadow: 0 0 30px rgba($cl-blue, 0.25);
+
+        .team-score {
+          box-shadow: 0 0 15px rgba($cl-blue, 0.4);
+          border-color: $cl-blue;
+        }
+
+        h2 {
+          text-shadow: 0 0 10px rgba($cl-blue, 0.4);
+        }
+      }
+    }
+
+    &.team-b {
+      background: linear-gradient(180deg, rgba($cl-red, 0.12) 0%, rgba($cl-red, 0.05) 100%);
+      border-color: rgba($cl-red, 0.25);
+
+      &.in-turn {
+        border-color: $cl-red;
+        background: linear-gradient(180deg, rgba($cl-red, 0.2) 0%, rgba($cl-red, 0.1) 100%);
+        box-shadow: 0 0 30px rgba($cl-red, 0.25);
+
+        .team-score {
+          box-shadow: 0 0 15px rgba($cl-red, 0.4);
+          border-color: $cl-red;
+        }
+
+        h2 {
+          text-shadow: 0 0 10px rgba($cl-red, 0.4);
+        }
+      }
+    }
+  }
+
+  .team-info h2 {
+    color: $cl-text;
+  }
+
+  .team-score {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: $cl-border;
+    color: $cl-text;
+    text-shadow: none;
+  }
+
+  // Round info
+  .round-info {
+    background: rgba(255, 255, 255, 0.6);
+    border-color: rgba($cl-gold, 0.25);
+  }
+
+  .question-text {
+    color: $cl-text;
+  }
+
+  .round-meta span {
+    background: rgba($cl-gold, 0.15);
+    border-color: rgba($cl-gold, 0.3);
+    color: $cl-gold;
+  }
+
+  // Answers
+  .answer-row {
+    background: rgba(255, 255, 255, 0.7);
+    border-color: rgba($cl-purple, 0.15);
+
+    &.revealed {
+      background: linear-gradient(135deg, rgba($cl-gold, 0.15) 0%, rgba($cl-gold-light, 0.1) 100%);
+      border-color: $cl-gold;
+      box-shadow: 0 0 15px rgba($cl-gold, 0.15);
+
+      .answer-position {
+        background: $cl-gold;
+        color: white;
+      }
+    }
+
+    &.hidden {
+      .answer-position {
+        background: rgba($cl-purple, 0.2);
+        color: white;
+      }
+    }
+  }
+
+  .answer-text {
+    color: $cl-text;
+  }
+
+  .answer-points {
+    color: $cl-gold;
+  }
+
+  .answer-position {
+    background: rgba($cl-gold, 0.5);
+    color: white;
+  }
+
+  // Strikes
+  .strike {
+    color: rgba(0, 0, 0, 0.1);
+
+    &.active {
+      color: $cl-red;
+      text-shadow: 0 0 15px $cl-red, 0 0 30px rgba($cl-red, 0.4);
+    }
+  }
+
+  // Idle screen
+  .board-idle-title {
+    color: $cl-gold;
+    text-shadow:
+      2px 2px 4px rgba(0, 0, 0, 0.1),
+      0 0 30px rgba($cl-gold, 0.3),
+      0 0 60px rgba($cl-gold, 0.15);
+  }
+
+  .board-audio-toggle {
+    background: rgba(0, 0, 0, 0.08);
+    border-color: rgba(0, 0, 0, 0.15);
+    color: $cl-text;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.15);
+      border-color: rgba(0, 0, 0, 0.25);
+    }
+  }
+
+  // Start overlay
+  .board-start-overlay {
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .board-start-button {
+    background: linear-gradient(135deg, $cl-gold, $cl-gold-light);
+    color: white;
+    border-color: rgba(0, 0, 0, 0.1);
+    box-shadow: 0 0 30px rgba($cl-gold, 0.3);
+
+    &:hover {
+      box-shadow: 0 0 50px rgba($cl-gold, 0.5);
+    }
+  }
+
+  // Strike overlay
+  .strike-overlay {
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  // Loading
+  .board-loading {
+    color: $cl-text-muted;
+  }
+}

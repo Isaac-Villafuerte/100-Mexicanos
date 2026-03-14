@@ -19,6 +19,7 @@ function GameBoardPage() {
   const [audioActivated, setAudioActivated] = useState(false);
   const themeMusic = useRef(null);
   const [themeMuted, setThemeMuted] = useState(false);
+  const [boardTheme, setBoardTheme] = useState('carnival-dark');
 
   const playSound = (soundRef) => {
     if (!soundRef?.current) return;
@@ -140,6 +141,21 @@ function GameBoardPage() {
     };
   }, [socket]);
 
+  // Listen for theme changes
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleThemeChanged = ({ theme }) => {
+      setBoardTheme(theme);
+    };
+
+    socket.on('THEME_CHANGED', handleThemeChanged);
+
+    return () => {
+      socket.off('THEME_CHANGED', handleThemeChanged);
+    };
+  }, [socket]);
+
   // Buzzer winner effect
   useEffect(() => {
     if (!socket) return;
@@ -244,7 +260,7 @@ function GameBoardPage() {
   const hasRevealedAnswer = currentRound?.answers?.some((a) => a.isRevealed) ?? false;
 
   return (
-    <div className="game-board">
+    <div className="game-board" data-theme={boardTheme}>
       {/* Audio Activation Overlay */}
       {!audioActivated && (
         <div className="board-start-overlay">
