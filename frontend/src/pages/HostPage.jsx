@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
 import { useEffect, useState, useRef } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
 import '../styles/pages/_host.scss';
 import '../styles/pages/_buzzer.scss';
 
@@ -8,6 +9,7 @@ function HostPage() {
   const { gameId } = useParams();
   const { gameState, isConnected, emit, socket } = useSocket(gameId, 'host');
   const [buzzerWinner, setBuzzerWinner] = useState(null);
+  const [showQR, setShowQR] = useState(false);
   const buzzerSound = useRef(null);
 
   useEffect(() => {
@@ -235,23 +237,61 @@ function HostPage() {
               <p>Esperando presión de botón...</p>
             )}
           </div>
-          <button
-            onClick={handleBuzzerReset}
-            className="btn btn-secondary"
-          >
-            Resetear Botonera
-          </button>
-          <div className="buzzer-links">
-            <p><strong>Enlaces de botonera:</strong></p>
-            <small>
-              <span>Dual: /buzzer/{gameId}</span>
-              <span> | </span>
-              <span>Equipo A: /buzzer/{gameId}/a</span>
-              <span> | </span>
-              <span>Equipo B: /buzzer/{gameId}/b</span>
-            </small>
+          <div className="buzzer-control-buttons">
+            <button
+              onClick={handleBuzzerReset}
+              className="btn btn-secondary"
+            >
+              Resetear Botonera
+            </button>
+            <button
+              onClick={() => setShowQR(true)}
+              className="btn btn-accent"
+            >
+              QR Botoneras
+            </button>
           </div>
         </section>
+
+        {showQR && (
+          <div className="host-qr-modal-overlay" onClick={() => setShowQR(false)}>
+            <div className="host-qr-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="host-qr-modal-header">
+                <h3>QR Botoneras / Buzzers</h3>
+                <button className="host-qr-close" onClick={() => setShowQR(false)}>✕</button>
+              </div>
+              <div className="host-qr-grid">
+                <div className="host-qr-item">
+                  <QRCodeSVG
+                    value={`${window.location.origin}/buzzer/${gameId}`}
+                    size={150}
+                    level="M"
+                    includeMargin
+                  />
+                  <span className="host-qr-label host-qr-label-dual">Dual (2 botones)</span>
+                </div>
+                <div className="host-qr-item">
+                  <QRCodeSVG
+                    value={`${window.location.origin}/buzzer/${gameId}/a`}
+                    size={150}
+                    level="M"
+                    includeMargin
+                  />
+                  <span className="host-qr-label host-qr-label-a">Equipo A</span>
+                </div>
+                <div className="host-qr-item">
+                  <QRCodeSVG
+                    value={`${window.location.origin}/buzzer/${gameId}/b`}
+                    size={150}
+                    level="M"
+                    includeMargin
+                  />
+                  <span className="host-qr-label host-qr-label-b">Equipo B</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <section className="round-navigation">
           <h3>Navegación de Rondas</h3>

@@ -16,6 +16,7 @@ function GameBoardPage() {
   const prevGameStateRef = useRef(null);
   const [buzzerWinner, setBuzzerWinner] = useState(null);
   const [strikeOverlay, setStrikeOverlay] = useState(null); // { count: 1|2|3, team: 'A'|'B' }
+  const [audioActivated, setAudioActivated] = useState(false);
 
   const playSound = (soundRef) => {
     if (!soundRef?.current) return;
@@ -45,32 +46,7 @@ function GameBoardPage() {
     gameStartSound.current = initAudio('/sounds/a_jugar_fadeout.mp3');
     buzzerSound.current = initAudio('/sounds/boton.mp3');
 
-    // Preload all sounds by playing them silently
-    const preloadSounds = () => {
-      [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
-        if (ref.current) {
-          ref.current.volume = 0;
-          ref.current.play().then(() => {
-            ref.current.pause();
-            ref.current.currentTime = 0;
-            ref.current.volume = 1;
-          }).catch(() => {});
-        }
-      });
-    };
-
-    // Try to preload on first user interaction
-    const handleInteraction = () => {
-      preloadSounds();
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
-    };
-    document.addEventListener('click', handleInteraction);
-    document.addEventListener('touchstart', handleInteraction);
-
     return () => {
-      document.removeEventListener('click', handleInteraction);
-      document.removeEventListener('touchstart', handleInteraction);
       [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
         if (ref.current) {
           try {
@@ -177,6 +153,20 @@ function GameBoardPage() {
     };
   }, [socket]);
 
+  const handleActivateAudio = () => {
+    [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
+      if (ref.current) {
+        ref.current.volume = 0;
+        ref.current.play().then(() => {
+          ref.current.pause();
+          ref.current.currentTime = 0;
+          ref.current.volume = 1;
+        }).catch(() => {});
+      }
+    });
+    setAudioActivated(true);
+  };
+
   if (!isConnected) {
     return (
       <div className="board-loading">
@@ -208,9 +198,19 @@ function GameBoardPage() {
   };
 
   const orderedAnswers = currentRound ? getOrderedAnswers(currentRound.answers) : { col1: [], col2: [] };
+  const hasRevealedAnswer = currentRound?.answers?.some((a) => a.isRevealed) ?? false;
 
   return (
     <div className="game-board">
+      {/* Audio Activation Overlay */}
+      {!audioActivated && (
+        <div className="board-start-overlay">
+          <button className="board-start-button" onClick={handleActivateAudio}>
+            Iniciar
+          </button>
+        </div>
+      )}
+
       {/* Decorative lights */}
       <div className="carnival-lights top-lights">
         {[...Array(20)].map((_, i) => (
@@ -262,9 +262,11 @@ function GameBoardPage() {
           {currentRound ? (
             <>
               <div className="round-info">
-                <h3 className="question-text">{currentRound.questionText}</h3>
+                <h3 className="question-text">
+                  {hasRevealedAnswer ? currentRound.questionText : '???'}
+                </h3>
                 <div className="round-meta">
-                  <span className="category">{currentRound.categoryName}</span>
+                  {hasRevealedAnswer && <span className="category">{currentRound.categoryName}</span>}
                   <span className="multiplier">x{currentRound.multiplier}</span>
                 </div>
               </div>

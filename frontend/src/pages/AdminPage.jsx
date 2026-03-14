@@ -58,7 +58,6 @@ function AdminPage() {
         {activeTab === 'game' && (
           <GameConfigForm 
             categories={categories} 
-            onGameCreated={(gameId) => navigate(`/host/${gameId}`)} 
           />
         )}
         {activeTab === 'categories' && (

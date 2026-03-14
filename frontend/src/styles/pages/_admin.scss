@@ -1509,3 +1509,207 @@
     padding: $spacing-xl;
   }
 }
+
+// ==========================================
+// GAME CREATED MODAL
+// ==========================================
+
+.game-created-modal {
+  max-width: 560px;
+
+  .modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+}
+
+.game-created-id {
+  text-align: center;
+  padding: $spacing-md;
+  background: $bg-light;
+  border-radius: $border-radius;
+  border: 2px solid $primary-color;
+
+  .game-id-label {
+    display: block;
+    font-size: $font-size-xs;
+    font-weight: 600;
+    color: $secondary-color;
+    text-transform: uppercase;
+    margin-bottom: $spacing-xs;
+  }
+
+  .game-id-value {
+    display: block;
+    font-size: $font-size-3xl;
+    font-weight: 900;
+    color: $primary-color;
+    letter-spacing: 2px;
+  }
+}
+
+.game-created-nav {
+  .game-created-nav-label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: $spacing-sm;
+  }
+
+  .game-created-nav-buttons {
+    display: flex;
+    gap: $spacing-sm;
+    flex-wrap: wrap;
+
+    .btn {
+      flex: 1;
+      min-width: 140px;
+      text-align: center;
+    }
+  }
+}
+
+.game-created-qr {
+  .game-created-qr-title {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $text-dark;
+    margin-bottom: $spacing-sm;
+    text-align: center;
+  }
+
+  .game-created-qr-grid {
+    display: flex;
+    justify-content: center;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+
+  .qr-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm;
+    background: white;
+    border-radius: $border-radius;
+    border: 1px solid #e5e7eb;
+  }
+
+  .qr-label {
+    font-size: $font-size-xs;
+    font-weight: 700;
+    padding: 2px $spacing-sm;
+    border-radius: 4px;
+    text-align: center;
+
+    &-dual {
+      background: linear-gradient(135deg, #1976d2 50%, #d32f2f 50%);
+      color: white;
+    }
+
+    &-a {
+      background: #1976d2;
+      color: white;
+    }
+
+    &-b {
+      background: #d32f2f;
+      color: white;
+    }
+  }
+}
+
+// ==========================================
+// HOST QR MODAL
+// ==========================================
+
+.host-qr-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  padding: $spacing-md;
+}
+
+.host-qr-modal {
+  background: #16213e;
+  border-radius: 12px;
+  padding: $spacing-lg;
+  max-width: 560px;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.15);
+
+  .host-qr-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-md;
+
+    h3 {
+      color: white;
+      font-size: $font-size-lg;
+      margin: 0;
+    }
+
+    .host-qr-close {
+      background: none;
+      border: none;
+      color: #a0aec0;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 4px;
+
+      &:hover {
+        color: white;
+      }
+    }
+  }
+
+  .host-qr-grid {
+    display: flex;
+    justify-content: center;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+  }
+
+  .host-qr-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-sm;
+    padding: $spacing-md;
+    background: white;
+    border-radius: $border-radius;
+
+    .host-qr-label {
+      font-size: $font-size-sm;
+      font-weight: 700;
+      padding: 3px $spacing-sm;
+      border-radius: 4px;
+      text-align: center;
+
+      &-dual {
+        background: linear-gradient(135deg, #1976d2 50%, #d32f2f 50%);
+        color: white;
+      }
+
+      &-a {
+        background: #1976d2;
+        color: white;
+      }
+
+      &-b {
+        background: #d32f2f;
+        color: white;
+      }
+    }
+  }
+}

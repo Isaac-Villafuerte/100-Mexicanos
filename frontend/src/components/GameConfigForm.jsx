@@ -1,6 +1,9 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { QRCodeSVG } from 'qrcode.react';
 
-function GameConfigForm({ categories, onGameCreated }) {
+function GameConfigForm({ categories }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     title: '100 Mexicanos Dijeron',
     targetScore: 300,
@@ -9,6 +12,7 @@ function GameConfigForm({ categories, onGameCreated }) {
   });
 
   const [loading, setLoading] = useState(false);
+  const [createdGameId, setCreatedGameId] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -24,8 +28,7 @@ function GameConfigForm({ categories, onGameCreated }) {
       const data = await response.json();
       
       if (data.game) {
-        alert(`Juego creado con ID: ${data.game.id}`);
-        onGameCreated(data.game.id);
+        setCreatedGameId(data.game.id);
       }
     } catch (error) {
       console.error('Error creating game:', error);
@@ -33,6 +36,14 @@ function GameConfigForm({ categories, onGameCreated }) {
     } finally {
       setLoading(false);
     }
+  };
+
+  const getBaseUrl = () => {
+    return window.location.origin;
+  };
+
+  const handleCloseModal = () => {
+    setCreatedGameId(null);
   };
 
   return (
@@ -85,6 +96,74 @@ function GameConfigForm({ categories, onGameCreated }) {
           {loading ? 'Creando...' : 'Crear Partida'}
         </button>
       </form>
+
+      {createdGameId && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content game-created-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Juego Creado</h3>
+              <button className="modal-close" onClick={handleCloseModal}>✕</button>
+            </div>
+            <div className="modal-body">
+              <div className="game-created-id">
+                <span className="game-id-label">ID del Juego</span>
+                <span className="game-id-value">{createdGameId}</span>
+              </div>
+
+              <div className="game-created-nav">
+                <p className="game-created-nav-label">Ir a:</p>
+                <div className="game-created-nav-buttons">
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => navigate(`/host/${createdGameId}`)}
+                  >
+                    Pantalla de Presentador
+                  </button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => navigate(`/board/${createdGameId}`)}
+                  >
+                    Tablero del Juego
+                  </button>
+                </div>
+              </div>
+
+              <div className="game-created-qr">
+                <p className="game-created-qr-title">QR Botoneras / Buzzers</p>
+                <div className="game-created-qr-grid">
+                  <div className="qr-item">
+                    <QRCodeSVG
+                      value={`${getBaseUrl()}/buzzer/${createdGameId}`}
+                      size={140}
+                      level="M"
+                      includeMargin
+                    />
+                    <span className="qr-label qr-label-dual">Dual (2 botones)</span>
+                  </div>
+                  <div className="qr-item">
+                    <QRCodeSVG
+                      value={`${getBaseUrl()}/buzzer/${createdGameId}/a`}
+                      size={140}
+                      level="M"
+                      includeMargin
+                    />
+                    <span className="qr-label qr-label-a">Equipo A</span>
+                  </div>
+                  <div className="qr-item">
+                    <QRCodeSVG
+                      value={`${getBaseUrl()}/buzzer/${createdGameId}/b`}
+                      size={140}
+                      level="M"
+                      includeMargin
+                    />
+                    <span className="qr-label qr-label-b">Equipo B</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
