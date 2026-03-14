@@ -62,6 +62,14 @@ export class GameRepositoryMySQL extends GameRepository {
       fields.push('team_b_score = ?');
       values.push(data.teamBScore);
     }
+    if (data.teamAName !== undefined) {
+      fields.push('team_a_name = ?');
+      values.push(data.teamAName);
+    }
+    if (data.teamBName !== undefined) {
+      fields.push('team_b_name = ?');
+      values.push(data.teamBName);
+    }
 
     if (fields.length === 0) return;
 
@@ -116,8 +124,8 @@ export class GameRepositoryMySQL extends GameRepository {
   async findCurrentRound(gameId) {
     const pool = getPool();
     const [rows] = await pool.execute(
-      'SELECT * FROM rounds WHERE game_id = ? ORDER BY round_number DESC LIMIT 1',
-      [gameId]
+      'SELECT * FROM rounds WHERE game_id = ? AND state != ? ORDER BY round_number DESC LIMIT 1',
+      [gameId, 'finished']
     );
     
     if (rows.length === 0) return null;

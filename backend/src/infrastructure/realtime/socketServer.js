@@ -189,6 +189,54 @@ export function createSocketServer(httpServer, dependencies) {
       }
     });
 
+    // Reset game: update scores, team names, clear current round
+    socket.on('RESET_GAME', async (data, callback) => {
+      const { gameId, teamAScore, teamBScore, teamAName, teamBName } = data;
+      console.log(`[RESET_GAME] Received for game ${gameId}:`, { teamAScore, teamBScore, teamAName, teamBName });
+      try {
+        const parsedGameId = parseInt(gameId);
+
+        // Finish all active rounds FIRST (before updating game)
+        let activeRound = await dependencies.gameRepository.findCurrentRound(parsedGameId);
+        let finishedCount = 0;
+        while (activeRound) {
+          console.log(`[RESET_GAME] Finishing round ${activeRound.id} (state: ${activeRound.state})`);
+          await dependencies.gameRepository.updateRound(activeRound.id, { state: 'finished' });
+          finishedCount++;
+          activeRound = await dependencies.gameRepository.findCurrentRound(parsedGameId);
+        }
+        console.log(`[RESET_GAME] Finished ${finishedCount} active rounds`);
+
+        // Now update the game data
+        const updateData = {
+          status: 'pending',
+          currentRoundNumber: 0
+        };
+        if (teamAScore !== undefined) updateData.teamAScore = parseInt(teamAScore);
+        if (teamBScore !== undefined) updateData.teamBScore = parseInt(teamBScore);
+        if (teamAName !== undefined) updateData.teamAName = teamAName;
+        if (teamBName !== undefined) updateData.teamBName = teamBName;
+
+        console.log(`[RESET_GAME] Updating game ${parsedGameId}:`, updateData);
+        await dependencies.gameRepository.update(parsedGameId, updateData);
+
+        // Get fresh state and broadcast
+        const gameState = await dependencies.getGameStateUseCase.execute({
+          gameId: parsedGameId
+        });
+
+        console.log(`[RESET_GAME] Broadcasting new state. currentRound: ${gameState.currentRound ? 'exists' : 'null'}`);
+        io.to(`game-${gameId}`).emit('GAME_STATE_UPDATED', gameState);
+        io.to(`game-${gameId}`).emit('GAME_RESET');
+
+        if (typeof callback === 'function') callback({ success: true });
+      } catch (error) {
+        console.error('[RESET_GAME] Error:', error);
+        socket.emit('ERROR', { message: error.message });
+        if (typeof callback === 'function') callback({ success: false, error: error.message });
+      }
+    });
+
     // BUZZER: Presionar botón del equipo
     socket.on('BUZZER_PRESS', ({ gameId, team }) => {
       const state = getBuzzerState(gameId);

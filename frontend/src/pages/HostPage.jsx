@@ -10,6 +10,14 @@ function HostPage() {
   const { gameState, isConnected, emit, socket } = useSocket(gameId, 'host');
   const [buzzerWinner, setBuzzerWinner] = useState(null);
   const [showQR, setShowQR] = useState(false);
+  const [confirmModal, setConfirmModal] = useState(null); // { team: 'A'|'B' }
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [resetForm, setResetForm] = useState({
+    teamAScore: 0,
+    teamBScore: 0,
+    teamAName: '',
+    teamBName: ''
+  });
   const buzzerSound = useRef(null);
 
   useEffect(() => {
@@ -94,13 +102,50 @@ function HostPage() {
   };
 
   const handleAssignPoints = (winnerTeam) => {
-    if (window.confirm(`¿Asignar puntos de esta ronda al equipo ${winnerTeam}?`)) {
+    setConfirmModal({ team: winnerTeam });
+  };
+
+  const confirmAssignPoints = () => {
+    if (confirmModal) {
       emit('ASSIGN_ROUND_POINTS', {
         gameId,
         roundId: gameState.currentRound.id,
-        winnerTeam
+        winnerTeam: confirmModal.team
       });
+      setConfirmModal(null);
     }
+  };
+
+  const handleOpenResetModal = () => {
+    setResetForm({
+      teamAScore: teamA?.score ?? 0,
+      teamBScore: teamB?.score ?? 0,
+      teamAName: teamA?.name ?? 'Equipo A',
+      teamBName: teamB?.name ?? 'Equipo B'
+    });
+    setShowResetModal(true);
+  };
+
+  const handleResetGame = () => {
+    const payload = {
+      gameId,
+      teamAScore: parseInt(resetForm.teamAScore) || 0,
+      teamBScore: parseInt(resetForm.teamBScore) || 0,
+      teamAName: resetForm.teamAName,
+      teamBName: resetForm.teamBName
+    };
+    console.log('[RESET_GAME] Sending:', payload);
+    emit('RESET_GAME', payload, (response) => {
+      console.log('[RESET_GAME] Response:', response);
+      if (response && !response.success) {
+        alert('Error al reiniciar: ' + (response.error || 'desconocido'));
+      }
+    });
+    setShowResetModal(false);
+  };
+
+  const handleResetScoresToZero = () => {
+    setResetForm(prev => ({ ...prev, teamAScore: 0, teamBScore: 0 }));
   };
 
   const handleStartNextRound = (multiplier = 1) => {
@@ -316,7 +361,107 @@ function HostPage() {
             </button>
           </div>
         </section>
+
+        <section className="game-reset-section">
+          <button onClick={handleOpenResetModal} className="btn btn-danger">
+            Reiniciar Juego
+          </button>
+        </section>
       </div>
+
+      {/* Confirm Assign Points Modal */}
+      {confirmModal && (
+        <div className="host-modal-overlay" onClick={() => setConfirmModal(null)}>
+          <div className="host-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="host-modal-header">
+              <h3>Confirmar Asignación</h3>
+              <button className="host-modal-close" onClick={() => setConfirmModal(null)}>✕</button>
+            </div>
+            <div className="host-modal-body">
+              <p className="host-modal-message">
+                ¿Asignar <strong>{currentRound?.roundScore ?? 0} puntos</strong> de esta ronda al equipo{' '}
+                <strong className={`team-color-${confirmModal.team.toLowerCase()}`}>
+                  {confirmModal.team === 'A' ? teamA.name : teamB.name}
+                </strong>?
+              </p>
+              <div className="host-modal-actions">
+                <button className="btn btn-secondary" onClick={() => setConfirmModal(null)}>Cancelar</button>
+                <button className="btn btn-success" onClick={confirmAssignPoints}>Confirmar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Game Modal */}
+      {showResetModal && (
+        <div className="host-modal-overlay" onClick={() => setShowResetModal(false)}>
+          <div className="host-modal host-modal-wide" onClick={(e) => e.stopPropagation()}>
+            <div className="host-modal-header">
+              <h3>Reiniciar Juego</h3>
+              <button className="host-modal-close" onClick={() => setShowResetModal(false)}>✕</button>
+            </div>
+            <div className="host-modal-body">
+              <div className="reset-form">
+                <div className="reset-section">
+                  <h4>Nombres de Equipos</h4>
+                  <div className="reset-row">
+                    <div className="reset-field">
+                      <label>Equipo A</label>
+                      <input
+                        type="text"
+                        value={resetForm.teamAName}
+                        onChange={(e) => setResetForm(prev => ({ ...prev, teamAName: e.target.value }))}
+                      />
+                    </div>
+                    <div className="reset-field">
+                      <label>Equipo B</label>
+                      <input
+                        type="text"
+                        value={resetForm.teamBName}
+                        onChange={(e) => setResetForm(prev => ({ ...prev, teamBName: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="reset-section">
+                  <div className="reset-section-header">
+                    <h4>Marcadores</h4>
+                    <button className="btn btn-secondary btn-compact" onClick={handleResetScoresToZero}>
+                      Poner en 0
+                    </button>
+                  </div>
+                  <div className="reset-row">
+                    <div className="reset-field">
+                      <label>Puntos {resetForm.teamAName}</label>
+                      <input
+                        type="number"
+                        value={resetForm.teamAScore}
+                        onChange={(e) => setResetForm(prev => ({ ...prev, teamAScore: e.target.value }))}
+                      />
+                    </div>
+                    <div className="reset-field">
+                      <label>Puntos {resetForm.teamBName}</label>
+                      <input
+                        type="number"
+                        value={resetForm.teamBScore}
+                        onChange={(e) => setResetForm(prev => ({ ...prev, teamBScore: e.target.value }))}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <p className="reset-note">Esto limpiará la pregunta actual e iniciará un nuevo juego.</p>
+              </div>
+              <div className="host-modal-actions">
+                <button className="btn btn-secondary" onClick={() => setShowResetModal(false)}>Cancelar</button>
+                <button className="btn btn-danger" onClick={handleResetGame}>Reiniciar Juego</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

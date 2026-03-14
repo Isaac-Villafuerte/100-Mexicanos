@@ -1,6 +1,6 @@
 import { useParams } from 'react-router-dom';
 import { useSocket } from '../hooks/useSocket';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import '../styles/pages/_board.scss';
 import '../styles/pages/_buzzer.scss';
 
@@ -17,6 +17,8 @@ function GameBoardPage() {
   const [buzzerWinner, setBuzzerWinner] = useState(null);
   const [strikeOverlay, setStrikeOverlay] = useState(null); // { count: 1|2|3, team: 'A'|'B' }
   const [audioActivated, setAudioActivated] = useState(false);
+  const themeMusic = useRef(null);
+  const [themeMuted, setThemeMuted] = useState(false);
 
   const playSound = (soundRef) => {
     if (!soundRef?.current) return;
@@ -46,7 +48,18 @@ function GameBoardPage() {
     gameStartSound.current = initAudio('/sounds/a_jugar_fadeout.mp3');
     buzzerSound.current = initAudio('/sounds/boton.mp3');
 
+    const theme = new Audio('/sounds/100 Latinos Dijeron Tema Completo.mp3');
+    theme.preload = 'auto';
+    theme.loop = true;
+    theme.volume = 0.5;
+    theme.load();
+    themeMusic.current = theme;
+
     return () => {
+      if (themeMusic.current) {
+        themeMusic.current.pause();
+        themeMusic.current = null;
+      }
       [correctSound, strikeSound, roundEndSound, gameStartSound, buzzerSound].forEach((ref) => {
         if (ref.current) {
           try {
@@ -164,8 +177,38 @@ function GameBoardPage() {
         }).catch(() => {});
       }
     });
+    // Start theme music if no round
+    if (themeMusic.current && !themeMuted) {
+      themeMusic.current.play().catch(() => {});
+    }
     setAudioActivated(true);
   };
+
+  const toggleThemeMute = useCallback(() => {
+    setThemeMuted((prev) => {
+      const next = !prev;
+      if (themeMusic.current) {
+        if (next) {
+          themeMusic.current.pause();
+        } else {
+          themeMusic.current.play().catch(() => {});
+        }
+      }
+      return next;
+    });
+  }, []);
+
+  // Manage theme music: play when idle (no round), stop when round starts
+  useEffect(() => {
+    if (!audioActivated || !themeMusic.current) return;
+    const hasRound = gameState?.currentRound != null;
+    if (hasRound) {
+      themeMusic.current.pause();
+      themeMusic.current.currentTime = 0;
+    } else if (!themeMuted) {
+      themeMusic.current.play().catch(() => {});
+    }
+  }, [audioActivated, gameState?.currentRound, themeMuted]);
 
   if (!isConnected) {
     return (
@@ -240,7 +283,7 @@ function GameBoardPage() {
 
       <header className="board-header">
         <h1 className="board-title">{title}</h1>
-        {/* Round score display */}
+        {/* Round score display below title */}
         {currentRound && (
           <div className="round-points-display">
             <span className="round-points-value">{currentRound.roundScore}</span>
@@ -266,7 +309,6 @@ function GameBoardPage() {
                   {hasRevealedAnswer ? currentRound.questionText : '???'}
                 </h3>
                 <div className="round-meta">
-                  {hasRevealedAnswer && <span className="category">{currentRound.categoryName}</span>}
                   <span className="multiplier">x{currentRound.multiplier}</span>
                 </div>
               </div>
@@ -324,8 +366,13 @@ function GameBoardPage() {
               </div>
             </>
           ) : (
-            <div className="waiting-round">
-              <h2>Esperando siguiente ronda...</h2>
+            <div className="board-idle">
+              <h2 className="board-idle-title">{title}</h2>
+              {audioActivated && (
+                <button className="board-audio-toggle board-audio-toggle-idle" onClick={toggleThemeMute}>
+                  {themeMuted ? '🔇' : '🔊'}
+                </button>
+              )}
             </div>
           )}
         </main>
